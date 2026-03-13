@@ -1,9 +1,9 @@
 export const today = new Date().toISOString().split('T')[0]
 
 export const IT_MEMBERS = [
-  'Ahmad Farid', 'Siti Nurhaliza', 'Rajesh Kumar', 'Lim Wei Xin',
-  'Nur Aisyah', 'Kevin Tan', 'Priya Subramaniam', 'Muhammad Haziq',
-  'Chloe Wong', 'Danial Ariff',
+  'Chu Jian Wei', 'Gan Shu Yi', 'Lim Kah Yee', 'Low Yee Fei',
+  'Ngoh Chin Shuan', 'Tan Jun Ling', 'Wong Kak Lok, Carol', 'Woo Xin Quan',
+  'Yaw Xin Ying, Alexa', 'Yeap Chun Hong', 'Xue Ting - intern', 'Hui Moon - intern'
 ]
 
 export const STATUS_COLOR = {

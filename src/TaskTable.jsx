@@ -33,6 +33,7 @@ export default function TaskTable({ tasks, onEdit, onDelete }) {
   const [search, setSearch] = useState('')
   const [filterMember, setFilterMember] = useState('All')
   const [filterStatus, setFilterStatus] = useState('All')
+  const [filterPriority, setFilterPriority] = useState('All')
   const [sortCol, setSortCol] = useState('startDate')
   const [sortDir, setSortDir] = useState('asc')
 
@@ -41,6 +42,13 @@ export default function TaskTable({ tasks, onEdit, onDelete }) {
     else { setSortCol(col); setSortDir('asc') }
   }
 
+  function clearFilters() {
+  setSearch('')
+  setFilterMember('All')
+  setFilterStatus('All')
+  setFilterPriority('All')
+}
+
   const filtered = useMemo(() => {
     let arr = tasks.filter(t => {
       const s = computeStatus(t)
@@ -48,6 +56,7 @@ export default function TaskTable({ tasks, onEdit, onDelete }) {
         && (filterStatus === 'All' || s === filterStatus)
         && (t.project.toLowerCase().includes(search.toLowerCase())
           || t.itName.toLowerCase().includes(search.toLowerCase()))
+        && (filterPriority === 'All' || t.priority === filterPriority)
     })
     arr = [...arr].sort((a, b) => {
       const av = a[sortCol] ?? ''
@@ -55,7 +64,7 @@ export default function TaskTable({ tasks, onEdit, onDelete }) {
       return sortDir === 'asc' ? (av < bv ? -1 : 1) : (av > bv ? -1 : 1)
     })
     return arr
-  }, [tasks, search, filterMember, filterStatus, sortCol, sortDir])
+  }, [tasks, search, filterMember, filterStatus, filterPriority, sortCol, sortDir])
 
   function Th({ col, label }) {
     const active = sortCol === col
@@ -84,6 +93,24 @@ export default function TaskTable({ tasks, onEdit, onDelete }) {
           {['All', 'In Progress', 'Upcoming', 'Delayed', 'On Hold', 'UAT', 'Completed']
             .map(s => <option key={s}>{s}</option>)}
         </select>
+        <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)} style={inp}>
+          {['All', 'High', 'Low']
+            .map(t => <option key={t}>{t}</option>)}
+        </select>
+        {(search || filterMember !== 'All' || filterStatus !== 'All' || filterPriority !== 'All') &&(        
+          <button
+          onClick={clearFilters}
+          style={{
+            background: '#1e293b',
+            border: '1px solid #334155',
+            borderRadius: 8,
+            color: '#cbd5f5',
+            padding: '8px 16px',
+            fontSize: 13,
+            cursor: 'pointer',
+            fontWeight: 600
+          }}
+          >Clear</button>)}
       </div>
 
       <div style={{ overflowX: 'auto' }}>

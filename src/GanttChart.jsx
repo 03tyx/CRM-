@@ -46,6 +46,7 @@ export default function GanttChart({ tasks }) {
   }, [cols])
 
   const todayIdx = dayIdx(today)
+  const twoWeekIdx = todayIdx + 14
 
   return (
     <div style={{ overflowX: 'auto' }}>
@@ -54,18 +55,18 @@ export default function GanttChart({ tasks }) {
         <div style={{ minWidth: LABEL_W, flexShrink: 0 }}>
           <div style={{ height: 52, borderBottom: '1px solid #1e3a5f', display: 'flex',
             alignItems: 'flex-end', padding: '0 12px 8px',
-            fontSize: 10, color: '#475569', fontWeight: 700, letterSpacing: '0.06em' }}>
+            fontSize: 10, color: '#f8f9fa', fontWeight: 700, letterSpacing: '0.06em' }}>
             MEMBER
           </div>
           {IT_MEMBERS.map(m => (
             <div key={m} style={{ height: ROW_H, display: 'flex', alignItems: 'center',
               padding: '0 12px', borderBottom: '1px solid #0f172a',
-              fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>
+              fontSize: 12, color: '#c0cad8', fontWeight: 600 }}>
               <div style={{ width: 8, height: 8, borderRadius: 99, marginRight: 8, flexShrink: 0,
                 background: byMember[m]?.some(t => computeStatus(t) === 'Delayed') ? '#ef4444'
                   : byMember[m]?.filter(t => computeStatus(t) !== 'Completed').length > 0 ? '#3b82f6' : '#22c55e'
               }} />
-              {m.split(' ')[0]} {m.split(' ')[1]?.[0]}.
+              {m}
             </div>
           ))}
         </div>
@@ -76,8 +77,8 @@ export default function GanttChart({ tasks }) {
           <div style={{ display: 'flex', height: 52, borderBottom: '1px solid #1e3a5f', position: 'relative' }}>
             {monthLabels.map(({ i, label }) => (
               <div key={i} style={{
-                position: 'absolute', left: i * COL_W, top: 0, fontSize: 10,
-                color: '#64748b', fontWeight: 700, padding: '4px 4px 0',
+                position: 'absolute', left: i * COL_W, top: 0, fontSize: 12,
+                color: '#ffffff', fontWeight: 700, padding: '4px 4px 0',
                 borderLeft: '1px solid #1e3a5f', pointerEvents: 'none', whiteSpace: 'nowrap',
               }}>{label}</div>
             ))}
@@ -92,7 +93,7 @@ export default function GanttChart({ tasks }) {
                     background: colBgs[i],
                     borderLeft: isMon ? '1px solid #1e293b' : 'none',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 9, color: d === today ? '#3b82f6' : isWknd ? '#2d3f57' : '#334155',
+                    fontSize: 12, color: d === today ? '#89a9ff' : isWknd ? '#2d3f57' : '#85e5f7',
                     fontWeight: d === today ? 800 : 400,
                   }}>
                     {date.getDate() === 1 || i % 7 === 0 ? date.getDate() : ''}
@@ -117,7 +118,15 @@ export default function GanttChart({ tasks }) {
               {todayIdx >= 0 && (
                 <div style={{
                   position: 'absolute', left: todayIdx * COL_W + COL_W / 2 - 1,
-                  top: 0, bottom: 0, width: 2, background: 'rgba(59,130,246,0.6)', zIndex: 5, pointerEvents: 'none',
+                  top: 0, bottom: 0, width: 2, background: 'rgba(59,130,246,0.6)', zIndex: 2, pointerEvents: 'none',
+                }} />
+              )}
+
+              {/* Next Two Week line */}
+              {twoWeekIdx >= 0 && (
+                <div style={{
+                  position: 'absolute', left: twoWeekIdx * COL_W + COL_W / 2 - 1,
+                  top: 0, bottom: 0, width: 2, background: 'rgba(249,115,22,0.8)', zIndex: 2, pointerEvents: 'none',
                 }} />
               )}
 
@@ -135,13 +144,65 @@ export default function GanttChart({ tasks }) {
                 const st = computeStatus(t)
                 const color = STATUS_COLOR[st]
                 return (
-                  <div key={t.id} title={`${t.project} — ${t.progress}% — ${st}`} style={{
-                    position: 'absolute', left, top: 6, height: ROW_H - 12, width,
-                    borderRadius: 6, overflow: 'hidden',
-                    background: `${color}28`, border: `1.5px solid ${color}70`,
-                    display: 'flex', alignItems: 'center', paddingLeft: 6,
-                    cursor: 'default', zIndex: 3,
+                  <div
+                    key={t.id}
+                    onMouseEnter={(e)=>{
+                      const tip = e.currentTarget.querySelector('.task-tooltip')
+                      if(tip) tip.style.opacity = 1
+                    }}
+                    onMouseLeave={(e)=>{
+                      const tip = e.currentTarget.querySelector('.task-tooltip')
+                      if(tip) tip.style.opacity = 0
+                    }}
+                    style={{
+                    position: 'absolute',
+                    left,
+                    top: 6,
+                    height: ROW_H - 12,
+                    width,
+                    borderRadius: 6,
+                    overflow: 'visible',
+                    background: `${color}28`,
+                    border: `1.5px solid ${color}70`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    paddingLeft: 6,
+                    cursor: 'default',
+                    zIndex: 3
                   }}>
+                    {/* Tooltip */}
+                 <div 
+                  className="task-tooltip"
+                  style={{
+                    position: 'absolute',
+                    top: m === IT_MEMBERS[0] ? '120%' : undefined,
+                    bottom: m === IT_MEMBERS[0] ? undefined : '120%',
+                    left: 0,
+                    background: '#000000',
+                    border: '1px solid #334155',
+                    borderRadius: 8,
+                    padding: '10px 12px',
+                    fontSize: 11,
+                    color: '#cbd5f5',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.4)',
+                    whiteSpace: 'nowrap',
+                    opacity: 0,
+                    pointerEvents: 'none',
+                    transition: 'opacity 0.15s',
+                    zIndex: 9999,
+                    isolation: 'isolate'
+                  }}>
+
+                    <div style={{ fontWeight: 700, marginBottom: 4 }}>{t.project}</div>
+                    <div>Start: {t.startDate}</div>
+                    <div>End: {t.endDate}</div>
+                    <div>Manday: {t.manday}</div>
+
+                    {t.al && <div>AL: {t.al}</div>}
+                    {t.targetUAT && <div>Target UAT: {t.targetUAT}</div>}
+                    {t.targetLive && <div>Target Live: {t.targetLive}</div>}
+
+                  </div>
                     <div style={{
                       position: 'absolute', left: 0, top: 0, bottom: 0,
                       width: `${t.progress}%`, background: `${color}38`, borderRadius: 4,
@@ -171,7 +232,7 @@ export default function GanttChart({ tasks }) {
           Today
         </div>
       </div>
-      <div style={{ marginTop: 8, fontSize: 11, color: '#334155' }}>
+      <div style={{ marginTop: 8, fontSize: 11, color: '#edf2fa' }}>
         💡 Gaps between bars = available capacity. Hover a bar to see details.
       </div>
     </div>

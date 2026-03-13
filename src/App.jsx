@@ -163,7 +163,7 @@ export default function App() {
                   <h3 style={{ color: '#f1f5f9', fontFamily: "'Sora',sans-serif", fontSize: 15, fontWeight: 700 }}>
                     📅 Team Timeline
                   </h3>
-                  <span style={{ fontSize: 12, color: '#475569' }}>Showing 8-week window · Today highlighted in blue</span>
+                  <span style={{ fontSize: 12, color: '#f0f4fa' }}>Showing 8-week window · Today highlighted in blue</span>
                 </div>
                 <GanttChart tasks={tasks} />
               </div>

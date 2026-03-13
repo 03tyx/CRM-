@@ -106,7 +106,7 @@ export default function Dashboard({ tasks }) {
               alignItems: 'center', gap: 4, padding: '6px 0',
               borderBottom: '1px solid #0f172a', fontSize: 12 }}>
               <div style={{ color: '#94a3b8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-                {a.m.split(' ')[0]}
+                {a.m}
                 {a.delayed > 0 && <span title={`${a.delayed} delayed`} style={{ fontSize: 10 }}>🔴</span>}
               </div>
               {[a.thisWeekFree, a.nextWeekFree].map((free, i) => (
@@ -170,7 +170,7 @@ export default function Dashboard({ tasks }) {
           {availability.map(a => (
             <div key={a.m} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ width: 140, fontSize: 11, color: '#94a3b8', fontWeight: 600, flexShrink: 0 }}>
-                {a.m.split(' ').slice(0, 2).join(' ')}
+                {a.m}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ background: '#0f172a', borderRadius: 99, height: 16, overflow: 'hidden' }}>
@@ -214,7 +214,7 @@ export default function Dashboard({ tasks }) {
                   <div style={{ width: 6, height: 6, borderRadius: 99, flexShrink: 0,
                     background: STATUS_COLOR[st] }} />
                   <div style={{ flex: 1, fontSize: 12, color: '#e2e8f0', fontWeight: 500 }}>{t.project}</div>
-                  <div style={{ fontSize: 11, color: '#64748b', minWidth: 100 }}>{t.itName.split(' ')[0]}</div>
+                  <div style={{ fontSize: 11, color: '#64748b', minWidth: 100 }}>{t.itName}</div>
                   <div style={{ minWidth: 80 }}><ProgressBar pct={t.progress} /></div>
                   <div style={{ fontSize: 11, color: '#64748b', minWidth: 30 }}>{t.progress}%</div>
                   <Badge label={st} color={STATUS_COLOR[st]} bg={STATUS_BG[st]} />
