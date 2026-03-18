@@ -26,14 +26,29 @@ export const STATUS_BG = {
 
 export const PRIORITY_COLOR = { High: '#ef4444', Low: '#64748b' }
 
-export function addWorkdays(startDate, days, alDates = []) {
+export function isOnLeave(date, leaves = []) {
+  return leaves.some(l => {
+    if (!l.start || !l.end) return false
+    return date >= l.start && date <= l.end
+  })
+}
+
+export function addWorkdays(startDate, days, leaves = []) {
   let d = new Date(startDate)
   let added = 0
+
   while (added < days) {
     d.setDate(d.getDate() + 1)
+
     const iso = d.toISOString().split('T')[0]
-    if (d.getDay() !== 0 && d.getDay() !== 6 && !alDates.includes(iso)) added++
+    const isWeekend = d.getDay() === 0 || d.getDay() === 6
+    const onLeave = isOnLeave(iso, leaves)
+
+    if (!isWeekend && !onLeave) {
+      added++
+    }
   }
+
   return d.toISOString().split('T')[0]
 }
 

@@ -38,7 +38,7 @@ function ProgressBar({ pct }) {
 }
 
 const blank = {
-  itName: '', project: '', manday: '', al: '', startDate: '',
+  itName: '', project: '', manday: '', al: [], startDate: '',
   endDate: '', progress: 0, priority: 'High', status: 'In Progress',
   updatedDate: today, targetUAT: '', targetLive: '',
 }
@@ -52,7 +52,7 @@ export default function TaskForm({ onSave, initial, onCancel, saving }) {
       const upd = { ...f, [k]: v }
       if ((k === 'manday' || k === 'startDate' || k === 'al') && !endLocked) {
         if (upd.manday && upd.startDate) {
-          upd.endDate = addWorkdays(upd.startDate, Number(upd.manday), upd.al ? [upd.al] : [])
+          upd.endDate = addWorkdays(upd.startDate, Number(upd.manday), upd.al || [])
         }
       }
       return upd
@@ -103,8 +103,53 @@ export default function TaskForm({ onSave, initial, onCancel, saving }) {
         </div>
 
         <div>
-          <label style={lbl}>Annual Leave Date (if any)</label>
-          <input {...inp()} type="date" value={form.al} onChange={e => set('al', e.target.value)} />
+          <label style={lbl}>Annual Leave (optional)</label>
+
+          {form.al.map((leave, idx) => (
+            <div key={idx} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+              
+              <input
+                {...inp({ style: { flex: 1 } })}
+                type="date"
+                value={leave.start}
+                onChange={e => {
+                  const newAl = [...form.al]
+                  newAl[idx].start = e.target.value
+                  set('al', newAl)
+                }}
+              />
+
+              <input
+                {...inp({ style: { flex: 1 } })}
+                type="date"
+                value={leave.end}
+                onChange={e => {
+                  const newAl = [...form.al]
+                  newAl[idx].end = e.target.value
+                  set('al', newAl)
+                }}
+              />
+
+              <button
+                type="button"
+                onClick={() => {
+                  const newAl = form.al.filter((_, i) => i !== idx)
+                  set('al', newAl)
+                }}
+                style={{ ...btnGhost, padding: '6px 10px' }}
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={() => set('al', [...form.al, { start: '', end: '' }])}
+            style={{ ...btnGhost, marginTop: 4 }}
+          >
+            ➕ Add Leave
+          </button>
         </div>
 
         <div>
