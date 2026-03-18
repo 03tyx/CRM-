@@ -1,3 +1,4 @@
+//GanttChart.jsx
 import { useMemo } from 'react'
 import { IT_MEMBERS, computeStatus, STATUS_COLOR, today } from './helpers'
 
@@ -198,7 +199,15 @@ export default function GanttChart({ tasks }) {
                     <div>End: {t.endDate}</div>
                     <div>Manday: {t.manday}</div>
 
-                    {t.al && <div>AL: {t.al}</div>}
+                    {t.al && t.al.length > 0 && (
+                      <div>
+                        AL: {t.al.map((leave, i) => (
+                          <span key={i}>
+                            {leave.start}→{leave.end}{i < t.al.length - 1 ? ', ' : ''}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     {t.targetUAT && <div>Target UAT: {t.targetUAT}</div>}
                     {t.targetLive && <div>Target Live: {t.targetLive}</div>}
 
