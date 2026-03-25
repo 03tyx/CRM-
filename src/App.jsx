@@ -1,15 +1,12 @@
-import { useState } from 'react'
+//App.jsx
+import { useState, useMemo } from 'react'
 import { useTasks } from './useTasks'
 import TaskForm from './TaskForm'
 import TaskTable from './TaskTable'
 import GanttChart from './GanttChart'
 import Dashboard from './Dashboard'
-
-const TABS = [
-  { id: 'dashboard', label: '📊 Dashboard' },
-  { id: 'tasks',     label: '📋 Tasks' },
-  { id: 'gantt',     label: '📅 Timeline' },
-]
+import QuickAdd from './QuickAdd'
+import { computeStatus } from './helpers'
 
 export default function App() {
   const { tasks, loading, saving, error, createTask, updateTask, deleteTask } = useTasks()
@@ -17,6 +14,17 @@ export default function App() {
   const [showForm, setShowForm] = useState(false)
   const [editTask, setEditTask] = useState(null)
   const [toast, setToast]       = useState(null)
+  const isQuickMode = window.location.pathname === '/quick'
+
+  const delayedCount = useMemo(() =>
+    tasks.filter(t => computeStatus(t) === 'Delayed').length
+  , [tasks])
+
+  const TABS = [
+    { id: 'dashboard', label: '📊 Dashboard' },
+    { id: 'tasks',     label: '📋 Tasks', badge: delayedCount > 0 ? delayedCount : null },
+    { id: 'gantt',     label: '📅 Timeline' },
+  ]
 
   function showToast(msg, type = 'success') {
     setToast({ msg, type })
@@ -52,6 +60,10 @@ export default function App() {
     setShowForm(s => !s)
   }
 
+  if (isQuickMode) {
+    return <QuickPage createTask={createTask} saving={saving} />
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: '#0a0f1e',
       fontFamily: "'DM Sans','Segoe UI',sans-serif", color: '#e2e8f0' }}>
@@ -85,7 +97,18 @@ export default function App() {
               color: tab === t.id ? '#93c5fd' : '#64748b',
               borderRadius: 8, padding: '6px 16px', fontSize: 13, fontWeight: 600,
               cursor: 'pointer', transition: 'all 0.15s',
-            }}>{t.label}</button>
+              position: 'relative',
+            }}>
+              {t.label}
+              {t.badge && (
+                <span style={{
+                  position: 'absolute', top: -4, right: -4,
+                  background: '#ef4444', color: '#fff',
+                  borderRadius: 99, fontSize: 10, fontWeight: 700,
+                  padding: '1px 5px', lineHeight: '14px',
+                }}>{t.badge}</span>
+              )}
+            </button>
           ))}
         </div>
 
@@ -171,6 +194,24 @@ export default function App() {
           </>
         )}
       </div>
+
+      {/* ── Quick Add floating widget ── */}
+      <QuickAdd onSave={createTask} saving={saving} />
     </div>
   )
+
+  function QuickPage({ createTask, saving }) {
+    return (
+      <div style={{
+        height: '100vh',
+        background: '#020617',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <QuickAdd onSave={createTask} saving={saving} standalone />
+      </div>
+    )
+  }
 }
+

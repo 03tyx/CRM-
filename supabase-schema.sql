@@ -33,15 +33,15 @@ alter publication supabase_realtime add table public.tasks;
 
 -- ── Optional: seed with sample data ──────────────────────────
 -- (delete this block once you have real data)
-insert into public.tasks (it_name, project, manday, start_date, end_date, progress, priority, status, updated_date, target_uat, target_live)
-values
-  ('Ahmad Farid',      'CRM Customer Portal',   10, current_date - 10, current_date + 4,  60, 'High', 'In Progress', current_date, current_date + 10, current_date + 17),
-  ('Siti Nurhaliza',   'Reporting Module',      15, current_date - 14, current_date + 3,  80, 'High', 'In Progress', current_date, current_date + 7,  null),
-  ('Rajesh Kumar',     'API Integration v2',     8, current_date + 3,  current_date + 12, 0,  'Low',  'In Progress', current_date, null,              null),
-  ('Lim Wei Xin',      'Bug Fix Batch #12',      3, current_date - 5,  current_date - 3,  100,'High', 'In Progress', current_date, null,              null),
-  ('Nur Aisyah',       'Feedback Support Q2',    5, current_date - 2,  current_date + 3,  40, 'Low',  'In Progress', current_date, null,              null),
-  ('Kevin Tan',        'Mobile App Sync',        12,current_date + 10, current_date + 21, 0,  'High', 'In Progress', current_date, current_date + 24, current_date + 31),
-  ('Priya Subramaniam','UAT Support CRM v3',     6, current_date - 4,  current_date + 2,  90, 'High', 'UAT',         current_date, current_date + 4,  current_date + 11),
-  ('Muhammad Haziq',   'Data Migration Script',  4, current_date - 20, current_date - 16, 50, 'High', 'In Progress', current_date, null,              null),
-  ('Chloe Wong',       'Dashboard Enhancement',  7, current_date + 3,  current_date + 11, 0,  'Low',  'In Progress', current_date, null,              null),
-  ('Danial Ariff',     'Auth Module Upgrade',    9, current_date - 4,  current_date + 5,  70, 'High', 'In Progress', current_date, current_date + 10, null);
+-- insert into public.tasks (it_name, project, manday, start_date, end_date, progress, priority, status, updated_date, target_uat, target_live)
+-- values
+--   ('Ahmad Farid',      'CRM Customer Portal',   10, current_date - 10, current_date + 4,  60, 'High', 'In Progress', current_date, current_date + 10, current_date + 17),
+--   ('Siti Nurhaliza',   'Reporting Module',      15, current_date - 14, current_date + 3,  80, 'High', 'In Progress', current_date, current_date + 7,  null),
+--   ('Rajesh Kumar',     'API Integration v2',     8, current_date + 3,  current_date + 12, 0,  'Low',  'In Progress', current_date, null,              null),
+--   ('Lim Wei Xin',      'Bug Fix Batch #12',      3, current_date - 5,  current_date - 3,  100,'High', 'In Progress', current_date, null,              null),
+--   ('Nur Aisyah',       'Feedback Support Q2',    5, current_date - 2,  current_date + 3,  40, 'Low',  'In Progress', current_date, null,              null),
+--   ('Kevin Tan',        'Mobile App Sync',        12,current_date + 10, current_date + 21, 0,  'High', 'In Progress', current_date, current_date + 24, current_date + 31),
+--   ('Priya Subramaniam','UAT Support CRM v3',     6, current_date - 4,  current_date + 2,  90, 'High', 'UAT',         current_date, current_date + 4,  current_date + 11),
+--   ('Muhammad Haziq',   'Data Migration Script',  4, current_date - 20, current_date - 16, 50, 'High', 'In Progress', current_date, null,              null),
+--   ('Chloe Wong',       'Dashboard Enhancement',  7, current_date + 3,  current_date + 11, 0,  'Low',  'In Progress', current_date, null,              null),
+--   ('Danial Ariff',     'Auth Module Upgrade',    9, current_date - 4,  current_date + 5,  70, 'High', 'In Progress', current_date, current_date + 10, null);
