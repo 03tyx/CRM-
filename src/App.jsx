@@ -8,7 +8,7 @@ import { useDeployments } from './useDeployments'
 import DeploymentBoard from './DeploymentBoard'
 import Dashboard from './Dashboard'
 import QuickAdd from './QuickAdd'
-import ITBoard from './Itboard'
+import ITBoard from './ITBoard'
 import { useScrum } from './useScrum'
 import { computeStatus } from './helpers'
 
