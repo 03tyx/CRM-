@@ -206,7 +206,7 @@ export default function App() {
             {tab === 'itboard' && (
               <ITBoard
                 tasks={tasks}
-                subtasks={[]} // or from your hook if you have
+                // subtasks={[]} // or from your hook if you have
                 deployments={deployProps.deployments} 
                 createTask={createTask}
                 updateTask={updateTask}

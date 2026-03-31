@@ -216,7 +216,7 @@ function ScrumSection({ itName }) {
 // Tasks section (filtered to this IT member)
 // ─────────────────────────────────────────────────────────────────────────────
 
-function TasksSection({ itName, tasks, subtasks, createTask, updateTask, deleteTask, saving }) {
+function TasksSection({ itName, tasks, createTask, updateTask, deleteTask, saving }) {
   const [showForm, setShowForm] = useState(false)
   const [editing,  setEditing]  = useState(null)
 
@@ -270,7 +270,7 @@ function TasksSection({ itName, tasks, subtasks, createTask, updateTask, deleteT
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {myTasks.map(task => {
             const status  = computeStatus({ ...task, start_date: task.startDate, end_date: task.endDate })
-            const mySubs  = subtasks.filter(s => s.task_id === task.id)
+            // const mySubs  = subtasks.filter(s => s.task_id === task.id)
             return (
               <div key={task.id} style={{
                 background: '#0f172a', borderRadius: 8, padding: '10px 12px',
@@ -426,7 +426,7 @@ function DeploymentRemarksSection({ itName, deployments }) {
 // Single IT member card
 // ─────────────────────────────────────────────────────────────────────────────
 
-function ITMemberCard({ itName, tasks, subtasks, deployments, createTask, updateTask, deleteTask, saving }) {
+function ITMemberCard({ itName, tasks, deployments, createTask, updateTask, deleteTask, saving }) {
   const [expanded, setExpanded]   = useState(false)
   const [activeTab, setActiveTab] = useState('scrum')  // 'scrum' | 'tasks' | 'deployments'
 
@@ -505,7 +505,7 @@ function ITMemberCard({ itName, tasks, subtasks, deployments, createTask, update
               <TasksSection
                 itName={itName}
                 tasks={tasks}
-                subtasks={subtasks}
+                // subtasks={subtasks}
                 createTask={createTask}
                 updateTask={updateTask}
                 deleteTask={deleteTask}
@@ -526,7 +526,7 @@ function ITMemberCard({ itName, tasks, subtasks, deployments, createTask, update
 // Main ITBoard
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function ITBoard({ tasks, subtasks, deployments, createTask, updateTask, deleteTask, saving }) {
+export default function ITBoard({ tasks, deployments, createTask, updateTask, deleteTask, saving }) {
   const [search, setSearch] = useState('')
 
   const filtered = IT_MEMBERS.filter(name =>
@@ -563,7 +563,7 @@ export default function ITBoard({ tasks, subtasks, deployments, createTask, upda
             key={name}
             itName={name}
             tasks={tasks}
-            subtasks={subtasks}
+            // subtasks={subtasks}
             deployments={deployments}
             createTask={createTask}
             updateTask={updateTask}
