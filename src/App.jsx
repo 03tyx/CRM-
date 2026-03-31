@@ -8,6 +8,8 @@ import { useDeployments } from './useDeployments'
 import DeploymentBoard from './DeploymentBoard'
 import Dashboard from './Dashboard'
 import QuickAdd from './QuickAdd'
+import ITBoard from './Itboard'
+import { useScrum } from './useScrum'
 import { computeStatus } from './helpers'
 
 export default function App() {
@@ -27,6 +29,7 @@ export default function App() {
     { id: 'tasks',     label: '📋 Tasks', badge: delayedCount > 0 ? delayedCount : null },
     { id: 'gantt',     label: '📅 Timeline' },
     { id: 'deployment',  label: '🚀 Deployment'   },
+    { id: 'itboard',  label: '💻 IT Board'   },
   ]
 
   function showToast(msg, type = 'success') {
@@ -199,6 +202,18 @@ export default function App() {
                 tasks={tasks}
                 // currentUser={currentUser}
                 {...deployProps} />
+            )}
+            {tab === 'itboard' && (
+              <ITBoard
+                tasks={tasks}
+                subtasks={[]} // or from your hook if you have
+                deployments={deployProps.deployments} 
+                createTask={createTask}
+                updateTask={updateTask}
+                deleteTask={deleteTask}
+                saving={saving}
+                
+                 />
             )}
           </>
         )}

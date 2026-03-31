@@ -46,7 +46,11 @@ const blank = {
 }
 
 export default function TaskForm({ onSave, initial, onCancel, saving }) {
-  const [form, setForm] = useState(initial || blank)
+  // const [form, setForm] = useState(initial || blank)
+  const [form, setForm] = useState({
+    ...blank,
+    ...(initial || {})
+  })
   const [endLocked, setEndLocked] = useState(!!initial?.endDate)
 
   function set(k, v) {
@@ -107,7 +111,7 @@ export default function TaskForm({ onSave, initial, onCancel, saving }) {
         <div>
           <label style={lbl}>Annual Leave (optional)</label>
 
-          {form.al.map((leave, idx) => (
+          {(form.al || []).map((leave, idx) => (
             <div key={idx} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
               
               <input
@@ -147,7 +151,7 @@ export default function TaskForm({ onSave, initial, onCancel, saving }) {
 
           <button
             type="button"
-            onClick={() => set('al', [...form.al, { start: '', end: '' }])}
+            onClick={() => set('al', [...(form.al || []), { start: '', end: '' }])}
             style={{ ...btnGhost, marginTop: 4 }}
           >
             ➕ Add Leave

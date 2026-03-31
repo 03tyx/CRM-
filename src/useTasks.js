@@ -64,7 +64,7 @@ export function useTasks() {
   const logAction = useCallback(async ({
     task_id,
     action_type,
-    field_name = null,
+    // field_name = null,
     old_value = null,
     new_value = null
   }) => {
@@ -72,7 +72,7 @@ export function useTasks() {
       await supabase.from(LOGS_TABLE).insert([{
         task_id,
         action_type,
-        field_name,
+        // field_name,
         old_value,
         new_value,
         changed_by: 'current_user'
@@ -152,7 +152,7 @@ export function useTasks() {
           logAction({
             task_id: id,
             action_type: 'UPDATE',
-            field_name: key,
+            // field_name: key,
             old_value: oldTask?.[key],
             new_value: form[key]
           })
