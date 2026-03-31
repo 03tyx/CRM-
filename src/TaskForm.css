@@ -1,0 +1,5 @@
+input[type="date"] {
+  background-color: white;
+  color: rgb(255, 251, 251);
+  border: 1px solid #ccc;
+}

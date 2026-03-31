@@ -6,6 +6,28 @@ export const IT_MEMBERS = [
   'Yaw Xin Ying, Alexa', 'Yeap Chun Hong', 'Xue Ting - intern', 'Hui Moon - intern'
 ]
 
+export const PA_MEMBERS = [
+  'Beatrice', 'Toh Yan Xin'
+]
+
+export const IFA_MEMBERS = [
+  'Nic', 'Zach', 'YX', 'Alina', 'Angela', 'Agnes'
+]
+
+export const DISCOVERY_TYPES = [
+  { value: '', label: 'Select…' },
+  { value: 'self-discovered', label: 'Self-Discovered' },
+  { value: 'bug',            label: 'Bug' },
+]
+
+export const FEEDBACK_LOGS = [
+  { id: 'FL001', label: 'Commission Module Feedback Log', url: 'https://docs.google.com/document/d/1eI3_O9behQjBemO56v3R6rNbmm6oOiRkpjv7ELdccP4/edit?tab=t.0#heading=h.q7679xhplkb5' },
+  { id: 'FL002', label: 'Lodgement Module Feedback Log ', url: 'https://docs.google.com/document/d/1OQ6X3l8L9xmJTmGygaurajxQ6jYEWgs5PCYB6BdMvpo/edit?tab=t.0#heading=h.hstrvwgzo0nv' },
+  { id: 'FL003', label: 'CRM 2.0 Feedback Log', url: 'https://docs.google.com/document/d/1AGFhXAt5vklldjxm7xQRbF8bla5jfb5Pmb1wb_tLLh8/edit#heading=h.jqroo53mh8ok' },
+  { id: 'FL004', label: 'Advisor Onboarding Part 1 Feedback Log', url: 'https://docs.google.com/document/d/1lFHDjRj-aEeJZdreOLSdd7QwwgjZTOxl4By2UBnHZkY/edit?usp=sharing' },
+  { id: 'FL005', label: 'League Ladder Feedback Log', url: 'https://docs.google.com/document/d/1OP41AmcKm7ChQMEnMMzj9347kN-HADY6KYp4EJ1nObM/edit?usp=sharing' },
+]
+
 export const STATUS_COLOR = {
   'In Progress': '#3b82f6',
   'Completed':   '#22c55e',

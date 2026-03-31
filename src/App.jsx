@@ -4,6 +4,8 @@ import { useTasks } from './useTasks'
 import TaskForm from './TaskForm'
 import TaskTable from './TaskTable'
 import GanttChart from './GanttChart'
+import { useDeployments } from './useDeployments'
+import DeploymentBoard from './DeploymentBoard'
 import Dashboard from './Dashboard'
 import QuickAdd from './QuickAdd'
 import { computeStatus } from './helpers'
@@ -15,7 +17,7 @@ export default function App() {
   const [editTask, setEditTask] = useState(null)
   const [toast, setToast]       = useState(null)
   const isQuickMode = window.location.pathname === '/quick'
-
+  const deployProps  = useDeployments()
   const delayedCount = useMemo(() =>
     tasks.filter(t => computeStatus(t) === 'Delayed').length
   , [tasks])
@@ -24,6 +26,7 @@ export default function App() {
     { id: 'dashboard', label: '📊 Dashboard' },
     { id: 'tasks',     label: '📋 Tasks', badge: delayedCount > 0 ? delayedCount : null },
     { id: 'gantt',     label: '📅 Timeline' },
+    { id: 'deployment',  label: '🚀 Deployment'   },
   ]
 
   function showToast(msg, type = 'success') {
@@ -186,10 +189,16 @@ export default function App() {
                   <h3 style={{ color: '#f1f5f9', fontFamily: "'Sora',sans-serif", fontSize: 15, fontWeight: 700 }}>
                     📅 Team Timeline
                   </h3>
-                  <span style={{ fontSize: 12, color: '#f0f4fa' }}>Showing 8-week window · Today highlighted in blue</span>
+                  <span style={{ fontSize: 12, color: '#f0f4fa' }}>🔵 Blue: Today 🟠 Amber: Today + 1 Week</span>
                 </div>
                 <GanttChart tasks={tasks} />
               </div>
+            )}
+            {tab === 'deployment' && (
+              <DeploymentBoard
+                tasks={tasks}
+                // currentUser={currentUser}
+                {...deployProps} />
             )}
           </>
         )}
