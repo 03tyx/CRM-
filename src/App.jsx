@@ -11,6 +11,7 @@ import QuickAdd from './QuickAdd'
 import ITBoard from './ITBoard'
 import { useScrum } from './useScrum'
 import { computeStatus } from './helpers'
+import { useITEntries } from './useITEntries';
 
 export default function App() {
   const { tasks, loading, saving, error, createTask, updateTask, deleteTask } = useTasks()
@@ -23,6 +24,11 @@ export default function App() {
   const delayedCount = useMemo(() =>
     tasks.filter(t => computeStatus(t) === 'Delayed').length
   , [tasks])
+  const { getRows, saveRows, entries: itEntries } = useITEntries();
+  const { 
+    saveRows: saveMainDeploymentRows // Rename to distinguish from IT saveRows
+  } = useDeployments();
+
 
   const TABS = [
     { id: 'dashboard', label: '📊 Dashboard' },
@@ -208,11 +214,14 @@ export default function App() {
                 tasks={tasks}
                 // subtasks={[]} // or from your hook if you have
                 deployments={deployProps.deployments} 
+                itEntries={itEntries}      
+                getRows={getRows}         
+                saveRows={saveRows} 
+                syncToMainDeployment={saveMainDeploymentRows}
                 createTask={createTask}
                 updateTask={updateTask}
                 deleteTask={deleteTask}
                 saving={saving}
-                
                  />
             )}
           </>
