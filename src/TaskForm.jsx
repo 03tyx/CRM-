@@ -41,7 +41,7 @@ function ProgressBar({ pct }) {
 
 const blank = {
   itName: '', project: '', manday: '', al: [], startDate: '',
-  endDate: '', progress: 0, priority: 'High', status: 'In Progress',
+  endDate: '', progress: 0, status: 'In Progress',
   updatedDate: today, targetUAT: '', targetLive: '',
 }
 
@@ -108,7 +108,7 @@ export default function TaskForm({ onSave, initial, onCancel, saving }) {
           <input {...inp()} type="number" min="0.5" step="0.5" value={form.manday} onChange={e => set('manday', e.target.value)} />
         </div>
 
-        <div>
+        {/* <div>
           <label style={lbl}>Annual Leave (optional)</label>
 
           {(form.al || []).map((leave, idx) => (
@@ -156,7 +156,7 @@ export default function TaskForm({ onSave, initial, onCancel, saving }) {
           >
             ➕ Add Leave
           </button>
-        </div>
+        </div> */}
 
         <div>
           <label style={lbl}>Start Date *</label>
@@ -185,13 +185,13 @@ export default function TaskForm({ onSave, initial, onCancel, saving }) {
           <ProgressBar pct={form.progress} />
         </div>
 
-        <div>
+        {/* <div>
           <label style={lbl}>Priority</label>
           <select {...inp()} value={form.priority} onChange={e => set('priority', e.target.value)}>
             <option>High</option>
             <option>Low</option>
           </select>
-        </div>
+        </div> */}
 
         <div>
           <label style={lbl}>Status <span style={{ fontSize: 10, color: '#64748b' }}>(auto or override)</span></label>

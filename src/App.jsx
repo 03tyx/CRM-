@@ -11,6 +11,7 @@ import QuickAdd from './QuickAdd'
 import ITBoard from './ITBoard'
 import { computeStatus } from './helpers'
 import { useITEntries } from './useITEntries';
+import { useAnnualLeave } from './useAnnualLeave'
 
 export default function App() {
   const {tasks, loading: tasksLoading, saving: tasksSaving, error, createTask, updateTask, deleteTask } = useTasks()
@@ -19,6 +20,8 @@ export default function App() {
   const [editTask, setEditTask] = useState(null)
   const [toast, setToast] = useState(null)
   
+  const { leaves } = useAnnualLeave()
+
   const isQuickMode = window.location.pathname === '/quick'
 
   // Consolidated Deployment Hook
@@ -209,9 +212,9 @@ export default function App() {
                   <h3 style={{ color: '#f1f5f9', fontFamily: "'Sora',sans-serif", fontSize: 15, fontWeight: 700 }}>
                     📅 Team Capacity & Availability (3-Month View)
                   </h3>
-                  <span style={{ fontSize: 12, color: '#f0f4fa' }}>🔵 Blue: Today 🟠 Amber: Today + 1 Week</span>
+                  {/* <span style={{ fontSize: 12, color: '#f0f4fa' }}>🔵 Blue: Today 🟠 Amber: Today + 1 Week</span> */}
                 </div>
-                <GanttChart tasks={tasks} />
+                <GanttChart tasks={tasks} leaves={leaves}/>
               </div>
             )}
             {tab === 'deployment' && (

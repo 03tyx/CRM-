@@ -3,7 +3,7 @@ export const today = new Date().toISOString().split('T')[0]
 export const IT_MEMBERS = [
   'Chu Jian Wei', 'Gan Shu Yi', 'Lim Kah Yee', 'Low Yee Fei',
   'Ngoh Chin Shuan', 'Tan Jun Ling', 'Wong Kak Lok, Carol', 'Woo Xin Quan',
-  'Yaw Xin Ying, Alexa', 'Yeap Chun Hong', 'Xue Ting - intern', 'Hui Moon - intern'
+  'Yaw Xin Ying, Alexa', 'Yeap Chun Hong', 'Chin Xue Ting - intern', 'Gan Hui Moon - intern'
 ]
 
 export const PA_MEMBERS = [
