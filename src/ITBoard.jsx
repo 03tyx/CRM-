@@ -1,4 +1,4 @@
-// Itboard.jsx
+// ITBoard.jsx
 import { useState, useMemo, useEffect } from 'react'
 import { IT_MEMBERS, IFA_MEMBERS, FEEDBACK_LOGS, DISCOVERY_TYPES, today, computeStatus, STATUS_COLOR, STATUS_BG } from './helpers'
 import { lbl, inpStyle, btnPrimary, btnGhost } from './ui'
