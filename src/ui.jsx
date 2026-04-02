@@ -1,4 +1,4 @@
-import { STATUS_COLOR, STATUS_BG, PRIORITY_COLOR } from './helpers'
+import { STATUS_COLOR, STATUS_BG} from './helpers'
 
 export function Badge({ label, color, bg }) {
   return (
@@ -15,9 +15,9 @@ export function StatusBadge({ status }) {
   return <Badge label={status} color={STATUS_COLOR[status]} bg={STATUS_BG[status]} />
 }
 
-export function PriorityBadge({ priority }) {
-  return <Badge label={priority} color={PRIORITY_COLOR[priority]} />
-}
+// export function PriorityBadge({ priority }) {
+//   return <Badge label={priority} color={PRIORITY_COLOR[priority]} />
+// }
 
 export function ProgressBar({ pct }) {
   return (

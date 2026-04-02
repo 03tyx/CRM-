@@ -8,27 +8,38 @@ import { useDeployments } from './useDeployments'
 import DeploymentBoard from './DeploymentBoard'
 import Dashboard from './Dashboard'
 import QuickAdd from './QuickAdd'
-import ITBoard from './ITBoard'
-import { useScrum } from './useScrum'
+import ITBoard from './Itboard'
 import { computeStatus } from './helpers'
 import { useITEntries } from './useITEntries';
 
 export default function App() {
-  const { tasks, loading, saving, error, createTask, updateTask, deleteTask } = useTasks()
-  const [tab, setTab]           = useState('dashboard')
+  const {tasks, loading: tasksLoading, saving: tasksSaving, error, createTask, updateTask, deleteTask } = useTasks()
+  const [tab, setTab] = useState('dashboard')
   const [showForm, setShowForm] = useState(false)
   const [editTask, setEditTask] = useState(null)
-  const [toast, setToast]       = useState(null)
+  const [toast, setToast] = useState(null)
+  
   const isQuickMode = window.location.pathname === '/quick'
-  const deployProps  = useDeployments()
+
+  // Consolidated Deployment Hook
+  const { 
+    deployments, 
+    loading: deployLoading, 
+    saving: deploySaving, 
+    saveRows: saveMainRows,
+    createDeployment,
+    deleteDeployment 
+  } = useDeployments()
+
+  // IT Entries Hook
+  const { getRows, saveRows: saveITRows, entries: itEntries, saving: itSaving } = useITEntries();
+
+  const loading = tasksLoading || deployLoading;
+  const saving = tasksSaving || deploySaving || itSaving;
+
   const delayedCount = useMemo(() =>
     tasks.filter(t => computeStatus(t) === 'Delayed').length
   , [tasks])
-  const { getRows, saveRows, entries: itEntries } = useITEntries();
-  const { 
-    saveRows: saveMainDeploymentRows // Rename to distinguish from IT saveRows
-  } = useDeployments();
-
 
   const TABS = [
     { id: 'dashboard', label: '📊 Dashboard' },
@@ -196,7 +207,7 @@ export default function App() {
               <div style={{ background: '#1e293b', borderRadius: 16, padding: 20, border: '1px solid #334155' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                   <h3 style={{ color: '#f1f5f9', fontFamily: "'Sora',sans-serif", fontSize: 15, fontWeight: 700 }}>
-                    📅 Team Timeline
+                    📅 Team Capacity & Availability (3-Month View)
                   </h3>
                   <span style={{ fontSize: 12, color: '#f0f4fa' }}>🔵 Blue: Today 🟠 Amber: Today + 1 Week</span>
                 </div>
@@ -206,18 +217,22 @@ export default function App() {
             {tab === 'deployment' && (
               <DeploymentBoard
                 tasks={tasks}
-                // currentUser={currentUser}
-                {...deployProps} />
+                deployments={deployments}
+                itEntries={itEntries} // Pass this so DeploymentBoard can show IT remarks
+                saveRows={saveMainRows}
+                createDeployment={createDeployment}
+                deleteDeployment={deleteDeployment}
+                loading={deployLoading}
+                saving={deploySaving} />
             )}
             {tab === 'itboard' && (
               <ITBoard
                 tasks={tasks}
-                // subtasks={[]} // or from your hook if you have
-                deployments={deployProps.deployments} 
+                deployments={deployments} 
                 itEntries={itEntries}      
                 getRows={getRows}         
-                saveRows={saveRows} 
-                syncToMainDeployment={saveMainDeploymentRows}
+                saveRows={saveITRows} 
+                syncToMainDeployment={saveMainRows}
                 createTask={createTask}
                 updateTask={updateTask}
                 deleteTask={deleteTask}

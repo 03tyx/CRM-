@@ -134,7 +134,7 @@ function buildBlocks(tasks, deployDateStr) {
     const taskUrl    = t.taskUrl   || null
     const taskKey    = `${taskLabel}||${taskUrl}`
     const isSelfDisc = t.discovery === 'self-discovered'
-    const pic        = t.pic        || ''
+    const pic        = t.pic        || ' '
     const liveDate   = t.deployLiveDate || deployDateStr
     const remarks    = t.remarks    || ''
 
@@ -157,11 +157,10 @@ function buildBlocks(tasks, deployDateStr) {
     entry.hasNonSelfDisc = true
 
     if (!entry.picMap[pic]) {
-      entry.picOrder.push(pic)
-      entry.picMap[pic] = { pic, liveDate, remarksList: [] }
+      entry.picOrder.push(pic);
+      entry.picMap[pic] = { pic: t.pic || '', liveDate, remarksList: [] }; // Store original empty string for display
     }
-
-    entry.picMap[pic].remarksList.push(remarks)
+    entry.picMap[pic].remarksList.push(remarks);
   }
 
   // Flatten into ordered blocks, skipping tasks that are 100% self-discovered

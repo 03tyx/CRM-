@@ -1,7 +1,7 @@
 //TaskTable.jsx
 
 import { useState, useMemo } from 'react'
-import { IT_MEMBERS, computeStatus, STATUS_COLOR, STATUS_BG, PRIORITY_COLOR, today } from './helpers'
+import { IT_MEMBERS, computeStatus, STATUS_COLOR, STATUS_BG, today } from './helpers'
 
 function Badge({ label, color, bg }) {
   return (
@@ -35,7 +35,7 @@ export default function TaskTable({ tasks, onEdit, onDelete }) {
   const [search, setSearch] = useState('')
   const [filterMember, setFilterMember] = useState('All')
   const [filterStatus, setFilterStatus] = useState('All')
-  const [filterPriority, setFilterPriority] = useState('All')
+  // const [filterPriority, setFilterPriority] = useState('All')
   const [sortCol, setSortCol] = useState('startDate')
   const [sortDir, setSortDir] = useState('asc')
 
@@ -48,7 +48,7 @@ export default function TaskTable({ tasks, onEdit, onDelete }) {
   setSearch('')
   setFilterMember('All')
   setFilterStatus('All')
-  setFilterPriority('All')
+  // setFilterPriority('All')
 }
 
   const filtered = useMemo(() => {
@@ -58,7 +58,7 @@ export default function TaskTable({ tasks, onEdit, onDelete }) {
         && (filterStatus === 'All' || s === filterStatus)
         && (t.project.toLowerCase().includes(search.toLowerCase())
           || t.itName.toLowerCase().includes(search.toLowerCase()))
-        && (filterPriority === 'All' || t.priority === filterPriority)
+        // && (filterPriority === 'All' || t.priority === filterPriority)
     })
     arr = [...arr].sort((a, b) => {
       const av = a[sortCol] ?? ''
@@ -66,7 +66,7 @@ export default function TaskTable({ tasks, onEdit, onDelete }) {
       return sortDir === 'asc' ? (av < bv ? -1 : 1) : (av > bv ? -1 : 1)
     })
     return arr
-  }, [tasks, search, filterMember, filterStatus, filterPriority, sortCol, sortDir])
+  }, [tasks, search, filterMember, filterStatus, sortCol, sortDir])
 
   function Th({ col, label }) {
     const active = sortCol === col
@@ -95,11 +95,11 @@ export default function TaskTable({ tasks, onEdit, onDelete }) {
           {['All', 'In Progress', 'Upcoming', 'Delayed', 'On Hold', 'UAT', 'Completed']
             .map(s => <option key={s}>{s}</option>)}
         </select>
-        <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)} style={inp}>
+        {/* <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)} style={inp}>
           {['All', 'High', 'Low']
             .map(t => <option key={t}>{t}</option>)}
-        </select>
-        {(search || filterMember !== 'All' || filterStatus !== 'All' || filterPriority !== 'All') &&(        
+        </select> */}
+        {(search || filterMember !== 'All' || filterStatus !== 'All') &&(        
           <button
           onClick={clearFilters}
           style={{
@@ -126,7 +126,7 @@ export default function TaskTable({ tasks, onEdit, onDelete }) {
               <Th col="endDate"   label="End"      />
               <th style={{ padding: '10px 12px', color: '#64748b', fontWeight: 700,
                 fontSize: 10, textTransform: 'uppercase', minWidth: 130 }}>Progress</th>
-              <Th col="priority"  label="Priority" />
+              {/* <Th col="priority"  label="Priority" /> */}
               <th style={{ padding: '10px 12px', color: '#64748b', fontWeight: 700,
                 fontSize: 10, textTransform: 'uppercase' }}>Status</th>
               <Th col="updatedDate" label="Updated" />
@@ -166,9 +166,9 @@ export default function TaskTable({ tasks, onEdit, onDelete }) {
                       <span style={{ color: '#94a3b8', fontSize: 11, minWidth: 30 }}>{t.progress}%</span>
                     </div>
                   </td>
-                  <td style={td}>
+                  {/* <td style={td}>
                     <Badge label={t.priority} color={PRIORITY_COLOR[t.priority]} />
-                  </td>
+                  </td> */}
                   <td style={td}>
                     <Badge label={st} color={STATUS_COLOR[st]} bg={STATUS_BG[st]} />
                   </td>

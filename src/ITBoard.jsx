@@ -587,12 +587,12 @@ import { lbl, inpStyle, btnPrimary, btnGhost } from './ui'
 import { useScrum } from './useScrum'
 import { useITEntries } from './useITEntries'
 import TaskForm from './TaskForm'
-
-
+ 
+ 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
-
+ 
 function addWorkdaysSimple(dateStr, n) {
   // move forward/backward by n workdays (Mon–Fri only)
   if (!dateStr) return ''
@@ -606,12 +606,12 @@ function addWorkdaysSimple(dateStr, n) {
   }
   return d.toISOString().split('T')[0]
 }
-
+ 
 function fmtDate(dateStr) {
   if (!dateStr) return ''
   return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
-
+ 
 function Badge({ label, color, bg }) {
   return (
     <span style={{
@@ -621,22 +621,22 @@ function Badge({ label, color, bg }) {
     }}>{label}</span>
   )
 }
-
+ 
 // ─────────────────────────────────────────────────────────────────────────────
 // Daily Scrum section (per IT member)
 // ─────────────────────────────────────────────────────────────────────────────
-
+ 
 function ScrumSection({ itName }) {
   const { entries, loading, saving, saveEntry, deleteEntry } = useScrum(itName)
   const [showForm, setShowForm] = useState(false)
   const [editing,  setEditing]  = useState(null)   // entry id being edited
   
-
+ 
   // Build a blank new entry — auto-populate dates from the latest entry
   function newDraft() {
     const latest = entries[0]
     const scrumDate = today
-
+ 
     // Auto-populate "Previous Working Day" from latest entry's "Today" text
     const prevDay = latest?.today || ''
     return {
@@ -647,25 +647,25 @@ function ScrumSection({ itName }) {
       next_day:   '',
     }
   }
-
+ 
   const [draft, setDraft] = useState(null)
-
+ 
   function openNew() {
     setDraft(newDraft())
     setEditing(null)
     setShowForm(true)
   }
-
+ 
   function openEdit(entry) {
     setDraft({ ...entry })
     setEditing(entry.id)
     setShowForm(true)
   }
-
+ 
   function setField(k, v) {
     setDraft(d => ({ ...d, [k]: v }))
   }
-
+ 
   async function handleSubmit() {
     if (!draft) return
     const res = await saveEntry(draft)
@@ -677,13 +677,13 @@ function ScrumSection({ itName }) {
       alert('Failed to save: ' + res.error)
     }
   }
-
+ 
   function handleCancel() {
     setShowForm(false)
     setDraft(null)
     setEditing(null)
   }
-
+ 
   const ta = (extra = {}) => ({
     style: {
       background: '#0f172a', border: '1px solid #334155', borderRadius: 8,
@@ -692,14 +692,14 @@ function ScrumSection({ itName }) {
       ...extra.style,
     }, ...extra,
   })
-
+ 
   const inp = {
     style: {
       background: '#0f172a', border: '1px solid #334155', borderRadius: 8,
       color: '#e2e8f0', padding: '7px 10px', fontSize: 12, width: '100%', outline: 'none',
     }
   }
-
+ 
   return (
     <div>
       {/* Header */}
@@ -714,7 +714,7 @@ function ScrumSection({ itName }) {
           }}>+ New Entry</button>
         )}
       </div>
-
+ 
       {/* Form */}
       {showForm && draft && (
         <div style={{ background: '#0f172a', borderRadius: 10, padding: 14, marginBottom: 12, border: '1px solid #334155' }}>
@@ -750,7 +750,7 @@ function ScrumSection({ itName }) {
           </div>
         </div>
       )}
-
+ 
       {/* Entry list */}
       {loading ? (
         <div style={{ color: '#475569', fontSize: 12, padding: '8px 0' }}>Loading…</div>
@@ -796,21 +796,21 @@ function ScrumSection({ itName }) {
     </div>
   )
 }
-
+ 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tasks section (filtered to this IT member)
 // ─────────────────────────────────────────────────────────────────────────────
-
+ 
 function TasksSection({ itName, tasks, createTask, updateTask, deleteTask, saving }) {
   const [showForm, setShowForm] = useState(false)
   const [editing,  setEditing]  = useState(null)
-
+ 
   const myTasks = useMemo(() =>
     tasks.filter(t => t.itName === itName)
          .sort((a, b) => (a.startDate || '').localeCompare(b.startDate || '')),
     [tasks, itName]
   )
-
+ 
   async function handleSave(form) {
     if (editing) {
       const res = await updateTask(editing.id, form)
@@ -820,9 +820,9 @@ function TasksSection({ itName, tasks, createTask, updateTask, deleteTask, savin
       if (res.success) setShowForm(false)
     }
   }
-
+ 
   
-
+ 
   return (
     <div>
       {/* Header */}
@@ -837,7 +837,7 @@ function TasksSection({ itName, tasks, createTask, updateTask, deleteTask, savin
           }}>+ Add Task</button>
         )}
       </div>
-
+ 
       {/* Task form */}
       {showForm && (
         <div style={{ marginBottom: 12 }}>
@@ -849,7 +849,7 @@ function TasksSection({ itName, tasks, createTask, updateTask, deleteTask, savin
           />
         </div>
       )}
-
+ 
       {/* Task list */}
       {myTasks.length === 0 && !showForm ? (
         <div style={{ color: '#475569', fontSize: 12, padding: '8px 0' }}>No tasks yet.</div>
@@ -910,7 +910,7 @@ function TasksSection({ itName, tasks, createTask, updateTask, deleteTask, savin
     </div>
   )
 }
-
+ 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared table styles (same as DeploymentBoard)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -918,20 +918,20 @@ const cellPad  = { padding: '6px 8px', verticalAlign: 'top' }
 const smallInp = { ...inpStyle, padding: '5px 8px', fontSize: 11 }
 const spanTd   = { ...cellPad, background: '#131e2e', borderRight: '1px solid #1e293b' }
 const uid      = () => Math.random().toString(36).slice(2)
-
+ 
 function emptyDetail() {
   return { id: uid(), remark: '', discovery: '', testingRequired: true, md: '', pic: '', liveDate: today }
 }
 function emptyRow() {
   return { id: uid(), task: { manual: '', feedbackLogId: '', feedbackLogUrl: '', feedbackLogLabel: '' }, details: [emptyDetail()] }
 }
-
+ 
 // ── Exact same TaskCell as DeploymentBoard ────────────────────────────────────
 function TaskCell({ value, onChange }) {
   const [mode,        setMode]        = useState('manual')
   const [customUrl,   setCustomUrl]   = useState(value.feedbackLogUrl   || '')
   const [customLabel, setCustomLabel] = useState(value.feedbackLogLabel || '')
-
+ 
   function handleFLSelect(id) {
     if (id === '__custom__') {
       onChange({ ...value, feedbackLogId: '__custom__', feedbackLogUrl: customUrl, feedbackLogLabel: customLabel })
@@ -940,7 +940,7 @@ function TaskCell({ value, onChange }) {
       onChange({ ...value, feedbackLogId: id, feedbackLogUrl: fl?.url || '', feedbackLogLabel: fl?.label || '' })
     }
   }
-
+ 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 180 }}>
       <div style={{ display: 'flex', gap: 4, marginBottom: 2 }}>
@@ -985,13 +985,13 @@ function TaskCell({ value, onChange }) {
     </div>
   )
 }
-
+ 
 // ─────────────────────────────────────────────────────────────────────────────
 // Deployment section per IT member — exact same table as DeploymentBoard
 // IT can add/edit/delete their own rows only. Cannot delete the deployment.
 // ─────────────────────────────────────────────────────────────────────────────
-function ITDeploymentSection({ itName, deployments = [], getRows, saveRows, syncToMainDeployment, isSaving }) {
-
+function ITDeploymentSection({ itName, deployments = [], entries, getRows, saveRows, syncToMainDeployment,isSaving }) {
+ 
   const TH = (label, extra = {}) => (
     <th style={{
       padding: '8px 8px', textAlign: 'left', color: '#475569', fontSize: 10,
@@ -999,30 +999,54 @@ function ITDeploymentSection({ itName, deployments = [], getRows, saveRows, sync
       background: '#0f172a', ...extra,
     }}>{label}</th>
   )
-
  
-
   // Local state per deployment: rows + save status
   const [localRows,  setLocalRows]  = useState({})  // depId → Row[]
   const [justSaved,  setJustSaved]  = useState({})  // depId → bool
-
-  // Hydrate from saved entries when they load
+ 
+  // Hydrate from entries — runs whenever entries or deployments change.
+  // Only overwrites a deployment's local rows if the user hasn't made local edits
+  // (tracked via the 'dirty' set).
+  const [dirty, setDirty] = useState(new Set())
+ 
   useEffect(() => {
-    deployments.forEach(dep => {
-      const saved = getRows(dep.id, itName)
-      if (saved.length > 0) {
-        setLocalRows(r => ({ ...r, [dep.id]: r[dep.id] || saved }))
-      }
+    setLocalRows(current => {
+      const next = { ...current }
+      deployments.forEach(dep => {
+        const key = String(dep.id)
+        if (dirty.has(key)) return  // user is editing — don't overwrite
+        const entry = entries.find(
+          e => String(e.deployment_id) === key && e.it_name === itName
+        )
+        if (entry?.rows) {
+          next[dep.id] = entry.rows
+        }
+      })
+      return next
     })
-  }, [deployments, getRows, itName])
-
+  }, [entries, deployments, itName])  // deliberately excludes dirty so it doesn't loop
+ 
   const getDepRows   = (depId) => localRows[depId] || []
-  const setDepRows   = (depId, updater) =>
+  const setDepRows   = (depId, updater) => {
+    setDirty(d => new Set(d).add(String(depId)))  // mark as user-edited
     setLocalRows(r => ({ ...r, [depId]: typeof updater === 'function' ? updater(r[depId] || []) : updater }))
-
+  }
+ 
   const addRow       = (depId) => setDepRows(depId, rows => [...rows, emptyRow()])
-  const patchRowTask = (depId, rowId, task) =>
-    setDepRows(depId, rows => rows.map(r => r.id === rowId ? { ...r, task } : r))
+  // const patchRowTask = (depId, rowId, task) =>
+  //   setDepRows(depId, rows => rows.map(r => r.id === rowId ? { ...r, task } : r))
+  const patchRowTask = (depId, rowId, taskPatch) => {
+    setDirty(d => new Set(d).add(String(depId)));
+    setLocalRows(prev => {
+      const rows = prev[depId] || [];
+      return {
+        ...prev,
+        [depId]: rows.map(r => 
+          r.id === rowId ? { ...r, task: taskPatch } : r
+        )
+      };
+    });
+  };
   const addDetail    = (depId, rowId) =>
     setDepRows(depId, rows => rows.map(r => r.id === rowId ? { ...r, details: [...r.details, emptyDetail()] } : r))
   const removeDetail = (depId, rowId, detailId) =>
@@ -1031,11 +1055,28 @@ function ITDeploymentSection({ itName, deployments = [], getRows, saveRows, sync
       const next = r.details.filter(d => d.id !== detailId)
       return next.length === 0 ? [] : [{ ...r, details: next }]
     }))
-  const patchDetail  = (depId, rowId, detailId, patch) =>
-    setDepRows(depId, rows => rows.map(r => r.id !== rowId ? r : {
-      ...r, details: r.details.map(d => d.id === detailId ? { ...d, ...patch } : d),
-    }))
-
+  // const patchDetail  = (depId, rowId, detailId, patch) =>
+  //   setDepRows(depId, rows => rows.map(r => r.id !== rowId ? r : {
+  //     ...r, details: r.details.map(d => d.id === detailId ? { ...d, ...patch } : d),
+  //   }))
+  const patchDetail = (depId, rowId, detailId, patch) => {
+    setDirty(d => new Set(d).add(String(depId)));
+    setLocalRows(prev => {
+      const rows = prev[depId] || [];
+      return {
+        ...prev,
+        [depId]: rows.map(r => 
+          r.id !== rowId ? r : {
+            ...r,
+            details: r.details.map(d => 
+              d.id === detailId ? { ...d, ...patch } : d // Removed forced itName
+            ),
+          }
+        )
+      };
+    });
+  };
+ 
   // async function handleSave(depId) {
   //   const rows = getDepRows(depId)
   //   const res  = await saveRows(depId, itName, rows)
@@ -1046,51 +1087,87 @@ function ITDeploymentSection({ itName, deployments = [], getRows, saveRows, sync
   //     alert('Save failed: ' + res.error)
   //   }
   // }
-
+ 
   async function handleSave(depId) {
     const rows = getDepRows(depId)
-
-    // 1. Save IT member rows
+ 
+    // Save only to it_deployment_entries — DeploymentBoard reads this separately
     const res = await saveRows(depId, itName, rows)
+ 
+    if (res.success) {
+        // 2. Sync to main Deployment Board
+        const mainDep = deployments.find(d => d.id === depId)
 
-    if (!res.success) {
-      alert('Save failed: ' + res.error)
-      return
-    }
+        if (mainDep && syncToMainDeployment) {
+          const otherRows = (mainDep.rows || []).filter(row =>
+            !row.details.some(d => d.pic === itName)
+          )
 
-    // 2. Sync to Deployment Board
-    const mainDep = deployments.find(d => d.id === depId)
+          // const updatedRows = [...otherRows, ...rows]
+          function normalizeRows(rows, itName) {
+            return rows.map(r => ({
+              ...r,
+              details: r.details.map(d => ({
+                ...d,
+                pic: d.pic || itName // ensure PIC always exists
+              }))
+            }))
+          }
 
-    if (mainDep) {
-      const existingRows = mainDep.rows || []
+          const updatedRows = [
+            ...otherRows,
+            ...normalizeRows(rows, itName)
+          ]
 
-      // remove rows belonging to this IT member
-      const otherRows = existingRows.filter(row =>
-        !row.details?.some(d => d.pic === itName)
-      )
+          await syncToMainDeployment(depId, updatedRows)
+        }
 
-      // merge updated rows
-      const updatedRows = [...otherRows, ...rows]
+        setJustSaved(s => ({ ...s, [depId]: true }))
+        setTimeout(() => setJustSaved(s => ({ ...s, [depId]: false })), 2000)
 
-      await syncToMainDeployment(depId, updatedRows)
-    }
+      } else {
+        alert('Save failed: ' + res.error)
+      }
 
-    // UI feedback
-    setJustSaved(s => ({ ...s, [depId]: true }))
-    setTimeout(() => setJustSaved(s => ({ ...s, [depId]: false })), 2000)
-  }
+ 
+// 2. Sync to the main Deployment Board record for Word Export
+  // const mainDep = deployments.find(d => String(d.id) === String(depId));
+  
+  // if (mainDep && typeof syncToMainDeployment === 'function') {
+  //   const existingMainRows = Array.isArray(mainDep.rows) ? mainDep.rows : [];
+    
+  //   // Filter logic:
+  //   // We remove any rows in the main deployment that were originally created 
+  //   // by this IT member (matching row.id) to avoid duplicates.
+  //   const otherMemberRows = existingMainRows.filter(mainRow => 
+  //     !rows.some(localRow => localRow.id === mainRow.id)
+  //   );
 
+  //   // Merge: Others' tasks + This member's updated tasks
+  //   const mergedRows = [...otherMemberRows, ...rows];
+
+  //   // This updates the 'deployments' table, which DeploymentBoard.jsx 
+  //   // uses to generate the Word Document.
+  //   await syncToMainDeployment(depId, mergedRows);
+  // }
+
+  // // UI feedback
+  // setDirty(d => { const next = new Set(d); next.delete(String(depId)); return next; });
+  // setJustSaved(s => ({ ...s, [depId]: true }));
+  // setTimeout(() => setJustSaved(s => ({ ...s, [depId]: false })), 2000);
+}
+ 
   if (deployments.length === 0) {
     return <div style={{ color: '#475569', fontSize: 12 }}>No deployments created yet.</div>
   }
-
+ 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {deployments.map(dep => {
         const rows = getDepRows(dep.id)
         return (
           <div key={dep.id} style={{ background: '#0f172a', borderRadius: 10, border: '1px solid #1e293b', overflow: 'hidden' }}>
-
+ 
             {/* Deployment header */}
             <div style={{ padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               borderBottom: '1px solid #1e293b', flexWrap: 'wrap', gap: 8 }}>
@@ -1115,7 +1192,7 @@ function ITDeploymentSection({ itName, deployments = [], getRows, saveRows, sync
                 {isSaving ? '⏳ Saving…' : justSaved[dep.id] ? '✓ Saved' : '💾 Save'}
               </button>
             </div>
-
+ 
             {/* Exact same table as DeploymentBoard */}
             <div style={{ padding: 14 }}>
               {rows.length > 0 && (
@@ -1142,14 +1219,14 @@ function ITDeploymentSection({ itName, deployments = [], getRows, saveRows, sync
                           const isLastDetail = di === span - 1
                           return (
                             <tr key={d.id} style={{ borderBottom: isLastDetail ? '2px solid #0f172a' : '1px dashed #293548' }}>
-
+ 
                               {di === 0 && (
                                 <td rowSpan={span} style={{ ...spanTd, textAlign: 'center', width: 32,
                                   color: '#94a3b8', fontWeight: 700, fontSize: 13, verticalAlign: 'middle' }}>
                                   {rowIdx + 1}
                                 </td>
                               )}
-
+ 
                               {di === 0 && (
                                 <td rowSpan={span} style={{ ...spanTd, minWidth: 200, verticalAlign: 'top' }}>
                                   <TaskCell value={row.task} onChange={task => patchRowTask(dep.id, row.id, task)} />
@@ -1160,7 +1237,7 @@ function ITDeploymentSection({ itName, deployments = [], getRows, saveRows, sync
                                   }}>+ add row</button>
                                 </td>
                               )}
-
+ 
                               {/* REMARKS FROM ASP */}
                               <td style={{ ...cellPad, minWidth: 200 }}>
                                 <input value={d.remark}
@@ -1172,7 +1249,7 @@ function ITDeploymentSection({ itName, deployments = [], getRows, saveRows, sync
                                   </div>
                                 )}
                               </td>
-
+ 
                               {/* SELF-DISC / BUG */}
                               <td style={{ ...cellPad, minWidth: 130 }}>
                                 <select value={d.discovery}
@@ -1183,7 +1260,7 @@ function ITDeploymentSection({ itName, deployments = [], getRows, saveRows, sync
                                   ))}
                                 </select>
                               </td>
-
+ 
                               {/* TESTING REQUIRED */}
                               <td style={{ ...cellPad, minWidth: 80, textAlign: 'center' }}>
                                 <button onClick={() => patchDetail(dep.id, row.id, d.id, { testingRequired: !d.testingRequired })}
@@ -1196,14 +1273,14 @@ function ITDeploymentSection({ itName, deployments = [], getRows, saveRows, sync
                                   {d.testingRequired ? 'Yes' : 'No'}
                                 </button>
                               </td>
-
+ 
                               {/* MD */}
                               <td style={{ ...cellPad, minWidth: 70 }}>
                                 <input type="number" min="0" step="0.01" value={d.md}
                                   onChange={e => patchDetail(dep.id, row.id, d.id, { md: e.target.value })}
                                   placeholder="3.25" style={{ ...smallInp, width: 64 }} />
                               </td>
-
+ 
                               {/* PIC — greyed out if self-discovered */}
                               <td style={{ ...cellPad, minWidth: 130 }}>
                                 <select value={d.pic}
@@ -1219,14 +1296,14 @@ function ITDeploymentSection({ itName, deployments = [], getRows, saveRows, sync
                                   </div>
                                 )}
                               </td>
-
+ 
                               {/* DEPLOYING LIVE ON */}
                               <td style={{ ...cellPad, minWidth: 130 }}>
                                 <input type="date" value={d.liveDate || today}
                                   onChange={e => patchDetail(dep.id, row.id, d.id, { liveDate: e.target.value })}
                                   style={{ ...smallInp, width: 130 }} />
                               </td>
-
+ 
                               {/* REMOVE */}
                               <td style={{ ...cellPad, width: 60, textAlign: 'center' }}>
                                 <button onClick={() => removeDetail(dep.id, row.id, d.id)}
@@ -1246,13 +1323,13 @@ function ITDeploymentSection({ itName, deployments = [], getRows, saveRows, sync
                   </table>
                 </div>
               )}
-
+ 
               {rows.length === 0 && (
                 <div style={{ color: '#475569', fontSize: 12, padding: '6px 0 10px' }}>
                   No tasks yet. Click <strong style={{ color: '#3b82f6' }}>+ Add Task</strong> to add one.
                 </div>
               )}
-
+ 
               <button onClick={() => addRow(dep.id)} style={{
                 background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)',
                 borderRadius: 8, color: '#3b82f6', padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontWeight: 600,
@@ -1264,25 +1341,25 @@ function ITDeploymentSection({ itName, deployments = [], getRows, saveRows, sync
     </div>
   )
 }
-
+ 
 // ─────────────────────────────────────────────────────────────────────────────
 // Single IT member card
 // ─────────────────────────────────────────────────────────────────────────────
-
+ 
 function ITMemberCard({ itName, tasks = [], deployments = [], itEntries = [], getRows, saveRows, syncToMainDeployment, createTask, updateTask, deleteTask, saving }) {
   const [expanded, setExpanded]   = useState(false)
   const [activeTab, setActiveTab] = useState('scrum')
-
-
+ 
+ 
   const myTaskCount  = tasks.filter(t => t.itName === itName).length
   const myEntryCount = itEntries.filter(e => e.it_name === itName && (e.rows?.length || 0) > 0).length
-
+ 
   const tabs = [
     { id: 'scrum',       label: '📋 Scrum'                          },
     { id: 'tasks',       label: `🗂 Tasks (${myTaskCount})`          },
     { id: 'deployments', label: `🚀 Deployments (${myEntryCount})`  },
   ]
-
+ 
   return (
     <div style={{ background: '#1e293b', borderRadius: 14, border: '1px solid #334155', overflow: 'hidden' }}>
       <div onClick={() => setExpanded(e => !e)} style={{
@@ -1307,7 +1384,7 @@ function ITMemberCard({ itName, tasks = [], deployments = [], itEntries = [], ge
         </div>
         <span style={{ color: '#475569', fontSize: 16 }}>{expanded ? '▲' : '▼'}</span>
       </div>
-
+ 
       {expanded && (
         <div style={{ borderTop: '1px solid #0f172a' }}>
           <div style={{ display: 'flex', background: '#0f172a', padding: '0 16px', gap: 4 }}>
@@ -1330,9 +1407,10 @@ function ITMemberCard({ itName, tasks = [], deployments = [], itEntries = [], ge
               <ITDeploymentSection
                 itName={itName}
                 deployments={deployments}
+                entries={itEntries}
                 getRows={getRows}
                 saveRows={saveRows}
-                syncToMainDeployment={syncToMainDeployment} 
+                syncToMainDeployment={syncToMainDeployment}
                 isSaving={saving}
               />
             )}
@@ -1342,18 +1420,18 @@ function ITMemberCard({ itName, tasks = [], deployments = [], itEntries = [], ge
     </div>
   )
 }
-
+ 
 // ─────────────────────────────────────────────────────────────────────────────
 // Main ITBoard
 // ─────────────────────────────────────────────────────────────────────────────
-
+ 
 export default function ITBoard({ tasks = [], deployments = [], itEntries = [], getRows, saveRows, syncToMainDeployment, createTask, updateTask, deleteTask, saving }) {
   const [search, setSearch] = useState('')
-
+ 
   const filtered = IT_MEMBERS.filter(name =>
     name.toLowerCase().includes(search.toLowerCase())
   )
-
+ 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
@@ -1388,12 +1466,12 @@ export default function ITBoard({ tasks = [], deployments = [], itEntries = [], 
     </div>
   )
 }
-
-function ITDeploymentCard({ dep, itName, itEntries, addEntry, updateEntry, deleteEntry, saving }) {
+ 
+function ITDeploymentCard({ dep, itName, itEntries, addEntry, updateEntry, deleteEntry, saving}) {
   const myEntries = itEntries.filter(e => e.deployment_id === dep.id && e.it_name === itName)
   const [showForm, setShowForm] = useState(false)
   const [draft,    setDraft]    = useState(null)
-
+ 
   const smallInp = {
     style: {
       background: '#1e293b', border: '1px solid #334155', borderRadius: 6,
@@ -1408,12 +1486,12 @@ function ITDeploymentCard({ dep, itName, itEntries, addEntry, updateEntry, delet
       outline: 'none', resize: 'vertical', minHeight: 56, fontFamily: 'inherit',
     }
   }
-
+ 
   function openAdd() {
     setDraft(emptyEntryDraft(dep.id, itName, dep.deploy_date))
     setShowForm(true)
   }
-
+ 
   function openEdit(entry) {
     setDraft({
       id:           entry.id,
@@ -1425,9 +1503,9 @@ function ITDeploymentCard({ dep, itName, itEntries, addEntry, updateEntry, delet
     })
     setShowForm(true)
   }
-
+ 
   function setField(k, v) { setDraft(d => ({ ...d, [k]: v })) }
-
+ 
   async function handleSubmit() {
     if (!draft) return
     let res
@@ -1439,7 +1517,7 @@ function ITDeploymentCard({ dep, itName, itEntries, addEntry, updateEntry, delet
     if (res.success) { setShowForm(false); setDraft(null) }
     else alert('Save failed: ' + res.error)
   }
-
+ 
   return (
     <div style={{ background: '#0f172a', borderRadius: 10, border: '1px solid #1e293b', marginBottom: 10, overflow: 'hidden' }}>
       {/* Deployment header — read only, no delete */}
@@ -1458,7 +1536,7 @@ function ITDeploymentCard({ dep, itName, itEntries, addEntry, updateEntry, delet
           borderRadius: 6, color: '#3b82f6', padding: '3px 10px', fontSize: 11, cursor: 'pointer', fontWeight: 600,
         }}>+ Add Remark</button>
       </div>
-
+ 
       {/* Entry form */}
       {showForm && draft && (
         <div style={{ padding: 12, borderBottom: '1px solid #1e293b', background: '#131e2e' }}>
@@ -1494,7 +1572,7 @@ function ITDeploymentCard({ dep, itName, itEntries, addEntry, updateEntry, delet
           </div>
         </div>
       )}
-
+ 
       {/* My entries */}
       {myEntries.length === 0 && !showForm ? (
         <div style={{ color: '#334155', fontSize: 12, padding: '10px 14px', fontStyle: 'italic' }}>
@@ -1539,7 +1617,7 @@ function ITDeploymentCard({ dep, itName, itEntries, addEntry, updateEntry, delet
     </div>
   )
 }
-
+ 
 function DeploymentSection({ itName, deployments = [], itEntries = [], addEntry, updateEntry, deleteEntry, saving }) {
   return (
     <div>
@@ -1568,4 +1646,3 @@ function DeploymentSection({ itName, deployments = [], itEntries = [], addEntry,
     </div>
   )
 }
-

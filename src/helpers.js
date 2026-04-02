@@ -28,25 +28,25 @@ export const FEEDBACK_LOGS = [
   { id: 'FL005', label: 'League Ladder Feedback Log', url: 'https://docs.google.com/document/d/1OP41AmcKm7ChQMEnMMzj9347kN-HADY6KYp4EJ1nObM/edit?usp=sharing' },
 ]
 
+//remove 'Delayed' change 'Upcoming' to red colour
 export const STATUS_COLOR = {
   'In Progress': '#3b82f6',
   'Completed':   '#22c55e',
-  'Delayed':     '#ef4444',
+  'Upcoming':     '#ef4444',
   'On Hold':     '#f59e0b',
   'UAT':         '#8b5cf6',
-  'Upcoming':    '#64748b',
 }
 
+//remove 'Delayed' change 'Upcoming' to red colour
 export const STATUS_BG = {
   'In Progress': 'rgba(59,130,246,0.15)',
   'Completed':   'rgba(34,197,94,0.15)',
-  'Delayed':     'rgba(239,68,68,0.15)',
+  'Upcoming':     'rgba(239,68,68,0.15)',
   'On Hold':     'rgba(245,158,11,0.15)',
   'UAT':         'rgba(139,92,246,0.15)',
-  'Upcoming':    'rgba(100,116,139,0.15)',
 }
 
-export const PRIORITY_COLOR = { High: '#ef4444', Low: '#64748b' }
+// export const PRIORITY_COLOR = { High: '#ef4444', Low: '#64748b' }
 
 export function isOnLeave(date, leaves = []) {
   return leaves.some(l => {

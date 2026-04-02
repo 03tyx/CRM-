@@ -791,7 +791,14 @@ export default function DeploymentBoard({
   async function handleExport(dep) {
     setExporting(dep.id)
     try {
-      const rows = getRows(dep.id)
+      // const rows = getRows(dep.id)
+      const deploymentRows = getRows(dep.id)
+
+      const itRows = itEntries
+        .filter(e => String(e.deployment_id) === String(dep.id))
+        .flatMap(e => e.rows || [])
+
+      const rows = [...deploymentRows, ...itRows]
       const exportRows = rows.flatMap(row => {
         const fl = FEEDBACK_LOGS.find(f => f.id === row.task.feedbackLogId)
         const taskLabel =

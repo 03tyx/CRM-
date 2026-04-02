@@ -36,7 +36,7 @@ export function useITEntries() {
       e => String(e.deployment_id) === String(deploymentId) && e.it_name === itName
     )
     return entry?.rows || []
-  }, [entries])
+  }, [entries])  // re-creates whenever entries changes so callers always get fresh data
 
   // ── Save (upsert) rows for one member in one deployment ───────────────────
   const saveRows = useCallback(async (deploymentId, itName, rows) => {
@@ -74,5 +74,5 @@ export function useITEntries() {
     }
   }, [])
 
-  return { entries, loading, saving, getRows, saveRows, refetch: fetchAll }
+  return { entries, loading, saving, saveRows, refetch: fetchAll }
 }

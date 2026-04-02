@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { IT_MEMBERS, computeStatus, STATUS_COLOR, STATUS_BG, PRIORITY_COLOR, today } from './helpers'
+import { IT_MEMBERS, computeStatus, STATUS_COLOR, STATUS_BG, today } from './helpers'
 
 function Badge({ label, color, bg }) {
   return (
@@ -143,7 +143,7 @@ export default function Dashboard({ tasks }) {
             </div>
           ))}
           <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #334155' }}>
-            <div style={{ color: '#64748b', fontSize: 11, marginBottom: 8, fontWeight: 700,
+            {/* <div style={{ color: '#64748b', fontSize: 11, marginBottom: 8, fontWeight: 700,
               letterSpacing: '0.06em', textTransform: 'uppercase' }}>Priority Split</div>
             <div style={{ display: 'flex', gap: 12 }}>
               {['High', 'Low'].map(p => {
@@ -156,7 +156,7 @@ export default function Dashboard({ tasks }) {
                   </div>
                 )
               })}
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -204,7 +204,7 @@ export default function Dashboard({ tasks }) {
               return t.startDate <= thisWkEnd && t.endDate >= thisWkStart
                 && s !== 'Completed'
             })
-            .sort((a, b) => a.priority === 'High' && b.priority !== 'High' ? -1 : 1)
+            // .sort((a, b) => a.priority === 'High' && b.priority !== 'High' ? -1 : 1)
             .map(t => {
               const st = computeStatus(t)
               return (
