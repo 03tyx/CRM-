@@ -206,7 +206,7 @@ export async function exportDeploymentDocx({ deployment, tasks, liveDate }) {
     children: [
       textCell('#',                 { width: CW[0], fill: HEADER_FILL, bold: true, align: AlignmentType.CENTER }),
       textCell('Task',              { width: CW[1], fill: HEADER_FILL, bold: true }),
-      textCell('Remarks from ASP',  { width: CW[2], fill: HEADER_FILL, bold: true }),
+      textCell('Remarks from iFAST',  { width: CW[2], fill: HEADER_FILL, bold: true }),
       textCell('PIC',               { width: CW[3], fill: HEADER_FILL, bold: true, align: AlignmentType.CENTER }),
       textCell('Deploying LIVE on', { width: CW[4], fill: HEADER_FILL, bold: true, align: AlignmentType.CENTER }),
     ],
