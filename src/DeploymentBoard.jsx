@@ -5,14 +5,14 @@ import { lbl, inpStyle, btnPrimary, btnGhost } from './ui'
 import { exportDeploymentDocx } from './exportDocx'
 
 const COL_WIDTHS = {
-  num: { width: 40, textAlign: 'center' },
-  task: { width: 235 },
-  remarks: { width: 'auto' },
-  discovery: { width: 130, textAlign: 'center' },
-  testing: { width: 80, textAlign: 'center' },
-  md: { width: 70, textAlign: 'center' },
-  pic: { width: 130, textAlign: 'center' },
-  live: { width: 130, textAlign: 'center' }
+  num: { width: 40, textAlign: 'center', color: '#D1D6D8E0' },
+  task: { width: 235, color: '#D1D6D8E0' },
+  remarks: { width: 'auto', color: '#D1D6D8E0' },
+  discovery: { width: 130, textAlign: 'center', color: '#D1D6D8E0' },
+  testing: { width: 80, textAlign: 'center', color: '#D1D6D8E0' },
+  md: { width: 70, textAlign: 'center', color: '#D1D6D8E0' },
+  pic: { width: 130, textAlign: 'center', color: '#D1D6D8E0' },
+  live: { width: 130, textAlign: 'center', color: '#D1D6D8E0' }
 };
 
 const ENV_COLOR = { Live: '#22c55e', UAT: '#8b5cf6', Staging: '#f59e0b' }
@@ -89,7 +89,7 @@ function DeploymentForm({ onSave, onCancel, saving }) {
  
 // ── TaskCell ──────────────────────────────────────────────────────────────────
 function TaskCell({ value, onChange }) {
-  const [mode,        setMode]        = useState('manual')
+  const [mode,        setMode]        = useState(value.feedbackLogId ? 'feedbacklog' : 'manual')
   const [customUrl,   setCustomUrl]   = useState(value.feedbackLogUrl   || '')
   const [customLabel, setCustomLabel] = useState(value.feedbackLogLabel || '')
  
@@ -389,15 +389,15 @@ export default function DeploymentBoard({
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                         <thead>
                           <tr>
-                            {TH('#',                { width: 32,  textAlign: 'center' })}
-                            {TH('Task',             { minWidth: 200 })}
-                            {TH('Remarks from ASP', { minWidth: 200 })}
-                            {TH('Self-Disc / Bug',  { minWidth: 130 })}
-                            {TH('Testing?',         { minWidth: 80, textAlign: 'center' })}
-                            {TH('MD',               { minWidth: 70 })}
-                            {TH('PIC',              { minWidth: 130 })}
-                            {TH('LIVE on',          { minWidth: 130 })}
-                            {TH('',                 { width: 60 })}
+                            {TH('#',                { width: 32,  textAlign: 'center', color: '#D1D6D8E0' })}
+                            {TH('Task',             { minWidth: 200, color: '#D1D6D8E0' })}
+                            {TH('Remarks from iFAST', { minWidth: 200, color: '#D1D6D8E0' })}
+                            {TH('Self-Disc / Bug',  { minWidth: 130, color: '#D1D6D8E0' })}
+                            {TH('Testing?',         { minWidth: 80, textAlign: 'center', color: '#D1D6D8E0' })}
+                            {TH('MD',               { minWidth: 70, color: '#D1D6D8E0' })}
+                            {TH('PIC',              { minWidth: 130, color: '#D1D6D8E0' })}
+                            {TH('LIVE on',          { minWidth: 130, color: '#D1D6D8E0' })}
+                            {TH('',                 { width: 60, color: '#D1D6D8E0' })}
                           </tr>
                         </thead>
                         <tbody>
@@ -439,7 +439,7 @@ export default function DeploymentBoard({
                                         style={{
                                           marginTop: 10, display: 'block',
                                           background: 'none', border: '1px dashed #334155',
-                                          borderRadius: 5, color: '#475569',
+                                          borderRadius: 5, color: '#D1D6D8E0',
                                           fontSize: 10, padding: '2px 10px', cursor: 'pointer',
                                         }}>+ add row</button>
                                     </td>
@@ -582,7 +582,7 @@ export default function DeploymentBoard({
                               <div style={{ overflowX: 'auto' }}>
                                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, tableLayout: 'fixed'}}>
                                   <thead>
-                                    <tr style={{ background: '#0f172a' }}>
+                                    <tr style={{ background: '#0f172a', color: '#d1d6d8e0' }}>
                                       {TH('#', COL_WIDTHS.num)}
                                       {TH('Task', COL_WIDTHS.task)}
                                       {TH('Remarks', COL_WIDTHS.remarks)}
@@ -592,12 +592,6 @@ export default function DeploymentBoard({
                                       {TH('PIC', COL_WIDTHS.pic)}
                                       {TH('LIVE on', COL_WIDTHS.live)}
                                     </tr>
-                                    {/* <tr style={{ background: '#0f172a' }}>
-                                      {['#','Task','Remarks','Self-Disc/Bug','Testing?','MD','PIC','LIVE on'].map(h => (
-                                        <th key={h} style={{ padding: '6px 8px', textAlign: 'left', color: '#475569',
-                                          fontSize: 10, fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{h}</th>
-                                      ))}
-                                    </tr> */}
                                   </thead>
                                   <tbody>
                                     {entryRows.map((row, rowIdx) =>
