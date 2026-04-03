@@ -86,11 +86,12 @@ export default function TaskTable({ tasks, onSave, onDelete, saving }) {
           placeholder="🔍  Search project or member…"
           style={{ ...inp, flex: 1, minWidth: 200 }} />
         <select value={filterMember} onChange={e => setFilterMember(e.target.value)} style={inp}>
-          <option>All</option>
+          <option>Select IT member...</option> 
           {IT_MEMBERS.map(m => <option key={m}>{m}</option>)}
         </select>
         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={inp}>
-          {['All', 'In Progress', 'Upcoming', 'Delayed', 'On Hold', 'UAT', 'Completed']
+          <option>Select status...</option>
+          {['In Progress', 'Upcoming', 'Delayed', 'On Hold', 'UAT', 'Completed']
             .map(s => <option key={s}>{s}</option>)}
         </select>
         {(search || filterMember !== 'All' || filterStatus !== 'All') && (
