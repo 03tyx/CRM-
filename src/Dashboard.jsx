@@ -83,7 +83,7 @@ export default function Dashboard({ tasks }) {
             padding: '18px 20px', border: `1px solid ${k.color}25` }}>
             <div style={{ fontSize: 22, marginBottom: 6 }}>{k.icon}</div>
             <div style={{ fontSize: 28, fontWeight: 800, color: k.color, fontFamily: "'Sora',sans-serif" }}>{k.val}</div>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{k.label}</div>
+            <div style={{ fontSize: 12, color: '#d1d6d8e0', marginTop: 2 }}>{k.label}</div>
           </div>
         ))}
       </div>
@@ -94,12 +94,12 @@ export default function Dashboard({ tasks }) {
         <div style={{ background: '#1e293b', borderRadius: 14, padding: 20, border: '1px solid #334155' }}>
           <h3 style={{ color: '#f1f5f9', fontFamily: "'Sora',sans-serif", fontSize: 14,
             fontWeight: 700, marginBottom: 6 }}>👥 Team Availability</h3>
-          <div style={{ fontSize: 11, color: '#475569', marginBottom: 14 }}>
+          {/* <div style={{ fontSize: 11, color: '#d1d6d8e0', marginBottom: 14 }}>
             {thisWkStart} → {thisWkEnd} &nbsp;|&nbsp; {nextWkStart} → {nextWkEnd}
-          </div>
+          </div> */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px', gap: 4,
-            marginBottom: 8, fontSize: 10, fontWeight: 700, color: '#475569', letterSpacing: '0.06em' }}>
-            <div>NAME</div><div>THIS WK</div><div>NEXT WK</div>
+            marginBottom: 8, fontSize: 10, fontWeight: 700, color: '#d1d6d8e0', letterSpacing: '0.06em' }}>
+            <div>NAME</div><div>THIS WEEK</div><div>NEXT WEEK</div>
           </div>
           {availability.map(a => (
             <div key={a.m} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px',
@@ -121,7 +121,7 @@ export default function Dashboard({ tasks }) {
           ))}
           <div style={{ marginTop: 12, padding: '10px 14px', background: '#0f172a', borderRadius: 10,
             display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-            <span style={{ color: '#64748b' }}>Available this week</span>
+            <span style={{ color: '#d1d6d8e0' }}>Available this week</span>
             <span style={{ color: '#22c55e', fontWeight: 700 }}>{availableNow} / {IT_MEMBERS.length} members</span>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function Dashboard({ tasks }) {
             <div key={s} style={{ marginBottom: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
                 <Badge label={s} color={STATUS_COLOR[s]} bg={STATUS_BG[s]} />
-                <span style={{ color: '#94a3b8', fontSize: 12 }}>{c} task{c !== 1 ? 's' : ''}</span>
+                <span style={{ color: '#d1d6d8e0', fontSize: 12 }}>{c} task{c !== 1 ? 's' : ''}</span>
               </div>
               <div style={{ background: '#0f172a', borderRadius: 99, height: 5, overflow: 'hidden' }}>
                 <div style={{ width: `${(c / total) * 100}%`, height: '100%',
@@ -143,20 +143,6 @@ export default function Dashboard({ tasks }) {
             </div>
           ))}
           <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #334155' }}>
-            {/* <div style={{ color: '#64748b', fontSize: 11, marginBottom: 8, fontWeight: 700,
-              letterSpacing: '0.06em', textTransform: 'uppercase' }}>Priority Split</div>
-            <div style={{ display: 'flex', gap: 12 }}>
-              {['High', 'Low'].map(p => {
-                const cnt = tasks.filter(t => t.priority === p).length
-                return (
-                  <div key={p} style={{ flex: 1, background: '#0f172a', borderRadius: 10,
-                    padding: '10px 14px', border: `1px solid ${PRIORITY_COLOR[p]}30` }}>
-                    <div style={{ fontSize: 22, fontWeight: 800, color: PRIORITY_COLOR[p] }}>{cnt}</div>
-                    <div style={{ fontSize: 10, color: '#64748b' }}>{p} Priority</div>
-                  </div>
-                )
-              })}
-            </div> */}
           </div>
         </div>
       </div>
@@ -181,7 +167,7 @@ export default function Dashboard({ tasks }) {
                   }} />
                 </div>
               </div>
-              <div style={{ width: 65, fontSize: 11, color: '#64748b', textAlign: 'right', flexShrink: 0 }}>
+              <div style={{ width: 65, fontSize: 11, color: '#94a3b8', textAlign: 'right', flexShrink: 0 }}>
                 {a.load} active
               </div>
               {a.delayed > 0 && (
@@ -214,9 +200,9 @@ export default function Dashboard({ tasks }) {
                   <div style={{ width: 6, height: 6, borderRadius: 99, flexShrink: 0,
                     background: STATUS_COLOR[st] }} />
                   <div style={{ flex: 1, fontSize: 12, color: '#e2e8f0', fontWeight: 500 }}>{t.project}</div>
-                  <div style={{ fontSize: 11, color: '#64748b', minWidth: 100 }}>{t.itName}</div>
+                  <div style={{ fontSize: 11, color: '#94a3b8', minWidth: 100 }}>{t.itName}</div>
                   <div style={{ minWidth: 80 }}><ProgressBar pct={t.progress} /></div>
-                  <div style={{ fontSize: 11, color: '#64748b', minWidth: 30 }}>{t.progress}%</div>
+                  <div style={{ fontSize: 11, color: '#94a3b8', minWidth: 30 }}>{t.progress}%</div>
                   <Badge label={st} color={STATUS_COLOR[st]} bg={STATUS_BG[st]} />
                 </div>
               )

@@ -1335,7 +1335,7 @@ function ALSection({ itName }) {
     <div>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <span style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <span style={{ color: '#d1d6d8e0', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           🌴 Annual Leave ({myLeaves.length})
         </span>
         {!showForm && (
@@ -1459,7 +1459,7 @@ function TasksSection({ itName, tasks, createTask, updateTask, deleteTask, savin
     <div>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <span style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <span style={{ color: '#d1d6d8e0', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           🗂 Tasks ({myTasks.length})
         </span>
         {!showForm && (
@@ -1807,7 +1807,7 @@ function ITDeploymentSection({ itName, deployments = [], entries, getRows, saveR
                 <span style={{ color: '#f1f5f9', fontWeight: 700, fontSize: 13 }}>
                   {dep.title || dep.deploy_date}
                 </span>
-                <span style={{ color: '#475569', fontSize: 11, marginLeft: 8 }}>
+                <span style={{ color: '#d1d6d8e0', fontSize: 11, marginLeft: 8 }}>
                   📅 {dep.deploy_date}
                 </span>
               </div>
@@ -1829,17 +1829,17 @@ function ITDeploymentSection({ itName, deployments = [], entries, getRows, saveR
             <div style={{ padding: 14 }}>
               {rows.length > 0 && (
                 <div style={{ overflowX: 'auto', marginBottom: 14 }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 1 }}>
                     <thead>
                       <tr>
-                        {TH('#',                { width: 32,  textAlign: 'center' })}
-                        {TH('Task',             { minWidth: 200 })}
-                        {TH('Remarks from ASP', { minWidth: 200 })}
-                        {TH('Self-Disc / Bug',  { minWidth: 130 })}
-                        {TH('Testing?',         { minWidth: 80, textAlign: 'center' })}
-                        {TH('MD',               { minWidth: 70 })}
-                        {TH('PIC',              { minWidth: 130 })}
-                        {TH('LIVE on',          { minWidth: 130 })}
+                        {TH('#',                { width: 32,  textAlign: 'center', color: '#d1d6d8e0' })}
+                        {TH('Task',             { minWidth: 200, color: '#d1d6d8e0' })}
+                        {TH('Remarks from iFAST', { minWidth: 200, color: '#d1d6d8e0' })}
+                        {TH('Self-Disc / Bug',  { minWidth: 130, color: '#d1d6d8e0' })}
+                        {TH('Testing?',         { minWidth: 80, textAlign: 'center', color: '#d1d6d8e0' })}
+                        {TH('MD',               { minWidth: 70, color: '#d1d6d8e0' })}
+                        {TH('PIC',              { minWidth: 130, color: '#d1d6d8e0' })}
+                        {TH('LIVE on',          { minWidth: 130, color: '#d1d6d8e0' })}
                         {TH('',                 { width: 60 })}
                       </tr>
                     </thead>
@@ -1864,7 +1864,7 @@ function ITDeploymentSection({ itName, deployments = [], entries, getRows, saveR
                                   <TaskCell value={row.task} onChange={task => patchRowTask(dep.id, row.id, task)} />
                                   <button onClick={() => addDetail(dep.id, row.id)} style={{
                                     marginTop: 10, display: 'block', background: 'none',
-                                    border: '1px dashed #334155', borderRadius: 5, color: '#475569',
+                                    border: '1px dashed #334155', borderRadius: 5, color: '#d1d6d8e0',
                                     fontSize: 10, padding: '2px 10px', cursor: 'pointer',
                                   }}>+ add row</button>
                                 </td>
@@ -1990,7 +1990,7 @@ function ITMemberCard({ itName, tasks = [], deployments = [], itEntries = [], ge
     // { id: 'scrum',       label: '📋 Scrum'                          },
     { id: 'tasks',       label: `🗂 Tasks (${myTaskCount})`          },
     { id: 'deployments', label: `🚀 Deployments (${myEntryCount})`  },
-    { id: 'al',          label: '🌴 Annual Leave'                    },
+    { id: 'al',          label: '🌴 Annual Leave'},
   ]
  
   return (
@@ -2009,7 +2009,7 @@ function ITMemberCard({ itName, tasks = [], deployments = [], itEntries = [], ge
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: '#f1f5f9', fontWeight: 700, fontSize: 14 }}>{itName}</div>
-          <div style={{ color: '#475569', fontSize: 11, marginTop: 2 }}>
+          <div style={{ color: '#d1d6d8e0', fontSize: 11, marginTop: 2 }}>
             {myTaskCount} task{myTaskCount !== 1 ? 's' : ''}
             &nbsp;·&nbsp;
             {deployments.length} deployment{deployments.length !== 1 ? 's' : ''}
@@ -2025,7 +2025,7 @@ function ITMemberCard({ itName, tasks = [], deployments = [], itEntries = [], ge
               <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
                 background: 'none', border: 'none',
                 borderBottom: `2px solid ${activeTab === tab.id ? '#3b82f6' : 'transparent'}`,
-                color: activeTab === tab.id ? '#3b82f6' : '#475569',
+                color: activeTab === tab.id ? '#3b82f6' : '#D1D6D8E0',
                 padding: '10px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600,
               }}>{tab.label}</button>
             ))}
@@ -2075,7 +2075,7 @@ export default function ITBoard({ tasks = [], deployments = [], itEntries = [], 
           <h2 style={{ color: '#f1f5f9', fontFamily: "'Sora',sans-serif", fontSize: 16, fontWeight: 700, margin: 0 }}>
             👤 IT Board
           </h2>
-          <p style={{ color: '#475569', fontSize: 12, marginTop: 4, marginBottom: 0 }}>
+          <p style={{ color: '#d1d6d8e0', fontSize: 12, marginTop: 4, marginBottom: 0 }}>
             Per-member tasks and depoyment items.
           </p>
         </div>
@@ -2094,7 +2094,7 @@ export default function ITBoard({ tasks = [], deployments = [], itEntries = [], 
           />
         ))}
         {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', color: '#475569', padding: 40, fontSize: 13 }}>
+          <div style={{ textAlign: 'center', color: '#d1d6d8e0', padding: 40, fontSize: 13 }}>
             No members match "{search}"
           </div>
         )}

@@ -70,7 +70,7 @@ export default function TaskTable({ tasks, onSave, onDelete, saving }) {
     const active = sortCol === col
     return (
       <th onClick={() => toggleSort(col)} style={{
-        padding: '10px 12px', textAlign: 'left', color: active ? '#93c5fd' : '#64748b',
+        padding: '10px 12px', textAlign: 'left', color: active ? '#93c5fd' : '#ffffff',
         fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
         fontSize: 10, whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none',
       }}>
@@ -111,12 +111,12 @@ export default function TaskTable({ tasks, onSave, onDelete, saving }) {
               <Th col="manday"    label="Manday"   />
               <Th col="startDate" label="Start"    />
               <Th col="endDate"   label="End"      />
-              <th style={{ padding: '10px 12px', color: '#64748b', fontWeight: 700,
+              <th style={{ padding: '10px 12px', color: '#ffffff', fontWeight: 700,
                 fontSize: 10, textTransform: 'uppercase', minWidth: 130 }}>Progress</th>
-              <th style={{ padding: '10px 12px', color: '#64748b', fontWeight: 700,
+              <th style={{ padding: '10px 12px', color: '#ffffff', fontWeight: 700,
                 fontSize: 10, textTransform: 'uppercase' }}>Status</th>
               <Th col="updatedDate" label="Updated" />
-              <th style={{ padding: '10px 12px', color: '#64748b', fontWeight: 700,
+              <th style={{ padding: '10px 12px', color: '#ffffff', fontWeight: 700,
                 fontSize: 10, textTransform: 'uppercase' }}>Actions</th>
             </tr>
           </thead>
@@ -143,15 +143,15 @@ export default function TaskTable({ tasks, onSave, onDelete, saving }) {
                     <td style={td}><span style={{ color: '#e2e8f0', fontWeight: 600 }}>{t.itName}</span></td>
                     <td style={td}>
                       <div style={{ color: '#f1f5f9', fontWeight: 500, maxWidth: 200 }}>{t.project}</div>
-                      {t.targetUAT  && <div style={{ color: '#64748b', fontSize: 10 }}>UAT: {t.targetUAT}</div>}
-                      {t.targetLive && <div style={{ color: '#64748b', fontSize: 10 }}>LIVE: {t.targetLive}</div>}
+                      {t.targetUAT  && <div style={{ color: '#94a3b8', fontSize: 10 }}>UAT: {t.targetUAT}</div>}
+                      {t.targetLive && <div style={{ color: '#94a3b8', fontSize: 10 }}>LIVE: {t.targetLive}</div>}
                       {isDelayed && <div style={{ color: '#ef4444', fontSize: 10, fontWeight: 600 }}>⚠️ OVERDUE</div>}
                     </td>
                     <td style={{ ...td, textAlign: 'center' }}>
                       <span style={{ color: '#93c5fd' }}>{t.manday}d</span>
                     </td>
-                    <td style={td}><span style={{ color: '#94a3b8' }}>{t.startDate}</span></td>
-                    <td style={td}><span style={{ color: overdue ? '#ef4444' : '#94a3b8' }}>{t.endDate}</span></td>
+                    <td style={td}><span style={{ color: '#e8ecf2' }}>{t.startDate}</span></td>
+                    <td style={td}><span style={{ color: overdue ? '#ef4444' : '#e8ecf2' }}>{t.endDate}</span></td>
                     <td style={{ ...td, minWidth: 130 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div style={{ flex: 1 }}><ProgressBar pct={t.progress} /></div>
@@ -161,7 +161,7 @@ export default function TaskTable({ tasks, onSave, onDelete, saving }) {
                     <td style={td}>
                       <Badge label={st} color={STATUS_COLOR[st]} bg={STATUS_BG[st]} />
                     </td>
-                    <td style={td}><span style={{ color: '#475569', fontSize: 11 }}>{t.updatedDate}</span></td>
+                    <td style={td}><span style={{ color: '#94a3b8', fontSize: 11 }}>{t.updatedDate}</span></td>
                     <td style={td}>
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button
@@ -211,7 +211,7 @@ export default function TaskTable({ tasks, onSave, onDelete, saving }) {
           </div>
         )}
       </div>
-      <div style={{ marginTop: 12, color: '#475569', fontSize: 11 }}>
+      <div style={{ marginTop: 12, color: '#aeb3b5e0', fontSize: 11 }}>
         Showing {filtered.length} of {tasks.length} tasks
       </div>
     </div>

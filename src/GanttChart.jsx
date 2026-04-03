@@ -433,7 +433,7 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
               background: '#1e293b', borderRight: '1px solid #334155',
               display: 'flex', alignItems: 'flex-end',
               padding: '0 14px 8px',
-              fontSize: 10, color: '#94a3b8', fontWeight: 700, letterSpacing: '0.06em',
+              fontSize: 11, color: '#94a3b8', fontWeight: 700, letterSpacing: '0.06em',
             }}>MEMBER</div>
 
             {/* Day columns */}
@@ -443,7 +443,7 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
                 {monthGroups.map((g, gi) => (
                   <div key={gi} style={{
                     minWidth: g.count * COL_W, width: g.count * COL_W,
-                    fontSize: 9, fontWeight: 800, color: '#94a3b8',
+                    fontSize: 11, fontWeight: 800, color: '#d1d6d8e0',
                     textTransform: 'uppercase', letterSpacing: '0.08em',
                     borderLeft: '1px solid #334155',
                     display: 'flex', alignItems: 'center', paddingLeft: 6,
@@ -465,9 +465,9 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
                       background: isToday ? 'rgba(59,130,246,0.15)' : isWeekend ? 'rgba(255,255,255,0.02)' : 'transparent',
                       borderLeft: `1px solid ${isToday ? '#3b82f6' : '#1e293b'}`,
                       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                      color: isToday ? '#93c5fd' : isWeekend ? '#334155' : '#64748b',
+                      color: isToday ? '#93c5fd' : isWeekend ? '#65676a' : '#d1d6d8e0',
                     }}>
-                      <span style={{ fontSize: 8, fontWeight: 700 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700 }}>
                         {date.toLocaleDateString('en', { weekday: 'short' }).toUpperCase()}
                       </span>
                       <span style={{ fontSize: 12, fontWeight: isToday ? 800 : 400 }}>{date.getDate()}</span>
@@ -480,7 +480,7 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
               {todayIdx >= 0 && (
                 <div style={{
                   position: 'absolute', left: todayIdx * COL_W + COL_W / 2 - 16,
-                  top: 58, width: 32, fontSize: 8, fontWeight: 800, color: '#3b82f6',
+                  top: 60, width: 32, fontSize: 9, fontWeight: 800, color: '#3b82f6',
                   textAlign: 'center', pointerEvents: 'none', zIndex: 6,
                 }}>TODAY</div>
               )}
@@ -489,7 +489,7 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
               {weekIdx >= 0 && (
                 <div style={{
                   position: 'absolute', left: weekIdx * COL_W + COL_W / 2 - 20,
-                  top: 58, width: 40, fontSize: 8, fontWeight: 800, color: '#f97316',
+                  top: 60, width: 40, fontSize: 9, fontWeight: 800, color: '#f97316',
                   textAlign: 'center', pointerEvents: 'none', zIndex: 6,
                 }}>+1 WK</div>
               )}
@@ -527,11 +527,11 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
                     </div>
                     {myAL.map(al => (
                       <div key={al.id} style={{
-                        fontSize: 9, color: '#f97316', fontWeight: 600,
+                        fontSize: 10, color: '#f97316', fontWeight: 600,
                         marginTop: 3, paddingLeft: 13,
                         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                       }}>
-                        🌴 {fmtShort(al.start_date)}{al.start_date !== al.end_date ? ` – ${fmtShort(al.end_date)}` : ''}
+                        AL: {fmtShort(al.start_date)}{al.start_date !== al.end_date ? ` – ${fmtShort(al.end_date)}` : ''}
                       </div>
                     ))}
                   </div>
@@ -665,11 +665,11 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
                               {t.project}
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                              <div style={{ color: '#94a3b8' }}>⏱ Manday: <span style={{ color: '#e2e8f0' }}>{t.manday || '—'}</span></div>
-                              <div style={{ color: '#94a3b8' }}>📅 Start: <span style={{ color: '#e2e8f0' }}>{t.startDate || '—'}</span></div>
-                              <div style={{ color: '#94a3b8' }}>🏁 End: <span style={{ color: '#e2e8f0' }}>{t.endDate || '—'}</span></div>
-                              <div style={{ color: '#94a3b8' }}>📊 Progress: <span style={{ color: '#e2e8f0' }}>{t.progress || 0}%</span></div>
-                              <div style={{ color: '#94a3b8' }}>🏷 Status: <span style={{ color }}>{st}</span></div>
+                              <div style={{ color: '#94a3b8' }}>⏳ Manday: <span style={{ color: '#d1d6d8e0' }}>{t.manday || '—'}</span></div>
+                              <div style={{ color: '#94a3b8' }}>📅 Start: <span style={{ color: '#d1d6d8e0' }}>{t.startDate || '—'}</span></div>
+                              <div style={{ color: '#94a3b8' }}>🏁 End: <span style={{ color: '#d1d6d8e0' }}>{t.endDate || '—'}</span></div>
+                              <div style={{ color: '#94a3b8' }}>📊 Progress: <span style={{ color: '#d1d6d8e0' }}>{t.progress || 0}%</span></div>
+                              <div style={{ color: '#94a3b8' }}>🚦 Status: <span style={{ color }}>{st}</span></div>
                             </div>
                           </div>
                         </div>

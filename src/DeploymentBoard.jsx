@@ -313,7 +313,7 @@ export default function DeploymentBoard({
           <h2 style={{ color: '#f1f5f9', fontFamily: "'Sora',sans-serif", fontSize: 16, fontWeight: 700 }}>
             🚀 Deployment Board
           </h2>
-          <p style={{ color: '#475569', fontSize: 12, marginTop: 4 }}>Export weekly deployment list</p>
+          <p style={{ color: '#d1d6d8e0', fontSize: 12, marginTop: 4 }}>Export weekly deployment list</p>
         </div>
         <button onClick={() => setShowForm(s => !s)} style={btnPrimary}>
           {showForm ? 'Cancel' : '+ New Deployment'}
@@ -325,7 +325,7 @@ export default function DeploymentBoard({
       )}
  
       {deployments.length === 0 && !showForm && (
-        <div style={{ textAlign: 'center', color: '#475569', padding: 60, fontSize: 13 }}>
+        <div style={{ textAlign: 'center', color: '#d1d6d8e0', padding: 60, fontSize: 13 }}>
           No deployments yet. Click <strong>+ New Deployment</strong> to start.
         </div>
       )}
@@ -344,8 +344,8 @@ export default function DeploymentBoard({
               <div style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 <div style={{ width: 4, height: 36, borderRadius: 99, background: envColor, flexShrink: 0 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ color: '#f1f5f9', fontWeight: 700, fontSize: 14 }}>{dep.title}</div>
-                  <div style={{ color: '#64748b', fontSize: 11, marginTop: 2 }}>
+                  {/* <div style={{ color: '#f1f5f9', fontWeight: 700, fontSize: 14 }}>{dep.title}</div> */}
+                  <div style={{ color: '#d1d6d8e0', fontSize: 13, marginTop: 2 }}>
                     📅 {dep.deploy_date} &nbsp;·&nbsp;
                     <span style={{ color: envColor }}>{dep.environment}</span>
                     &nbsp;·&nbsp; {rows.length} task{rows.length !== 1 ? 's' : ''}
@@ -543,7 +543,7 @@ export default function DeploymentBoard({
                   )}
  
                   {rows.length === 0 && (
-                    <div style={{ color: '#475569', fontSize: 12, padding: '10px 0 14px' }}>
+                    <div style={{ color: '#d1d6d8e0', fontSize: 12, padding: '10px 0 14px' }}>
                       No tasks yet. Click <strong style={{ color: '#3b82f6' }}>+ Add Task</strong> to add one.
                     </div>
                   )}
@@ -554,8 +554,8 @@ export default function DeploymentBoard({
                   }}>+ Add Task</button>
  
                   <div style={{ marginTop: 14, padding: '10px 14px', background: '#0f172a', borderRadius: 8,
-                    fontSize: 11, color: '#475569', border: '1px solid #1e293b' }}>
-                    💡 Fill in <strong style={{ color: '#94a3b8' }}>Remarks from ASP</strong> for each row, then click
+                    fontSize: 11, color: '#d1d6d8e0', border: '1px solid #1e293b' }}>
+                    💡 Fill in <strong style={{ color: '#d1d6d8e0' }}>Remarks from iFAST</strong> for each row, then click
                     <strong style={{ color: '#3b82f6' }}> 💾 Save</strong> to persist your tasks, and
                     <strong style={{ color: '#22c55e' }}> Export Word</strong> → downloads as
                     <strong style={{ color: '#94a3b8' }}> {'CRM_Deployment_List_{dep.deploy_date}.docx'}</strong>
@@ -567,20 +567,20 @@ export default function DeploymentBoard({
                     if (depITEntries.length === 0) return null
                     return (
                       <div style={{ marginTop: 18 }}>
-                        <div style={{ color: '#475569', fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                        <div style={{ color: '#d1d6d8e0', fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
                           letterSpacing: '0.06em', marginBottom: 10 }}>
-                          👤 IT Members' Remarks
+                          👤 IT Members' Deployment Items
                         </div>
                         {depITEntries.map(entry => {
                           const entryRows = entry.rows || []
                           if (entryRows.length === 0) return null
                           return (
                             <div key={entry.id} style={{ marginBottom: 12 }}>
-                              <div style={{ color: '#64748b', fontSize: 11, fontWeight: 700, marginBottom: 6 }}>
+                              <div style={{ color: '#d1d6d8e0', fontSize: 11, fontWeight: 700, marginBottom: 6 }}>
                                 {entry.it_name}
                               </div>
                               <div style={{ overflowX: 'auto' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, tableLayout: 'fixed' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, tableLayout: 'fixed'}}>
                                   <thead>
                                     <tr style={{ background: '#0f172a' }}>
                                       {TH('#', COL_WIDTHS.num)}
@@ -612,7 +612,7 @@ export default function DeploymentBoard({
                                         return (
                                           <tr key={d.id} style={{ borderBottom: '1px solid #1e293b' }}>
                                             {di === 0 && (
-                                              <td rowSpan={row.details.length} style={{ ...COL_WIDTHS.num, padding: '8px', color: '#475569', verticalAlign: 'middle', fontWeight: 700 }}>
+                                              <td rowSpan={row.details.length} style={{ ...COL_WIDTHS.num, padding: '8px', color: '#a4acb7', verticalAlign: 'middle', fontWeight: 700 }}>
                                                 {rowIdx + 1}
                                               </td>
                                             )}

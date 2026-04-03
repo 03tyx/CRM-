@@ -385,7 +385,7 @@ export default function App() {
             <button key={t.id} onClick={() => switchTab(t.id)} style={{
               background: tab === t.id ? 'rgba(59,130,246,0.15)' : 'transparent',
               border: tab === t.id ? '1px solid rgba(59,130,246,0.4)' : '1px solid transparent',
-              color: tab === t.id ? '#93c5fd' : '#64748b',
+              color: tab === t.id ? '#93c5fd' : '#D1D6D8E0',
               borderRadius: 8, padding: '6px 16px', fontSize: 13, fontWeight: 600,
               cursor: 'pointer', transition: 'all 0.15s', position: 'relative',
             }}>
