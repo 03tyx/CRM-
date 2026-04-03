@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { IT_MEMBERS, addWorkdays, computeStatus, STATUS_COLOR, STATUS_BG, today } from './helpers'
 import './TaskForm.css'
+import { useEffect } from 'react'
 
 const lbl = {
   display: 'block', color: '#94a3b8', fontSize: 11, fontWeight: 600,
@@ -46,12 +47,13 @@ const blank = {
 }
 
 export default function TaskForm({ onSave, initial, onCancel, saving }) {
-  // const [form, setForm] = useState(initial || blank)
   const [form, setForm] = useState({
     ...blank,
     ...(initial || {})
   })
   const [endLocked, setEndLocked] = useState(!!initial?.endDate)
+
+  const [isManualStatus, setIsManualStatus] = useState(!!initial?.status)
 
   function set(k, v) {
     setForm(f => {
@@ -66,6 +68,26 @@ export default function TaskForm({ onSave, initial, onCancel, saving }) {
   }
 
   const computed = computeStatus({ ...form, start_date: form.startDate, end_date: form.endDate })
+
+  useEffect(() => {
+    if (!isManualStatus) {
+      setForm(f => ({
+        ...f,
+        status: computed
+      }))
+    }
+  }, [computed, isManualStatus])
+
+  useEffect(() => {
+    // If progress reaches 100, force "Completed" and exit manual mode
+    if (Number(form.progress) === 100) {
+      setIsManualStatus(false);
+      setForm(f => ({ ...f, status: 'Completed' }));
+    } else {
+      // If it's less than 100, we revert to auto-mode (computed)
+      setIsManualStatus(false);
+    }
+  }, [form.progress, form.startDate, form.endDate]);
 
   const inp = (extra = {}) => ({
     style: {
@@ -85,6 +107,9 @@ export default function TaskForm({ onSave, initial, onCancel, saving }) {
 
   return (
     <div style={{ background: '#1e293b', borderRadius: 16, padding: 28, border: '1px solid #334155' }}>
+      <style>{`
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+      `}</style>
       <h3 style={{ color: '#f8fafc', fontFamily: "'Sora',sans-serif", marginBottom: 20, fontSize: 16, fontWeight: 700 }}>
         {initial ? '✏️ Edit Task' : '➕ New Task'}
       </h3>
@@ -108,111 +133,90 @@ export default function TaskForm({ onSave, initial, onCancel, saving }) {
           <input {...inp()} type="number" min="0.5" step="0.5" value={form.manday} onChange={e => set('manday', e.target.value)} />
         </div>
 
-        {/* <div>
-          <label style={lbl}>Annual Leave (optional)</label>
-
-          {(form.al || []).map((leave, idx) => (
-            <div key={idx} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-              
-              <input
-                {...inp({ style: { flex: 1 } })}
-                type="date"
-                value={leave.start}
-                onChange={e => {
-                  const newAl = [...form.al]
-                  newAl[idx].start = e.target.value
-                  set('al', newAl)
-                }}
-              />
-
-              <input
-                {...inp({ style: { flex: 1 } })}
-                type="date"
-                value={leave.end}
-                onChange={e => {
-                  const newAl = [...form.al]
-                  newAl[idx].end = e.target.value
-                  set('al', newAl)
-                }}
-              />
-
-              <button
-                type="button"
-                onClick={() => {
-                  const newAl = form.al.filter((_, i) => i !== idx)
-                  set('al', newAl)
-                }}
-                style={{ ...btnGhost, padding: '6px 10px' }}
-              >
-                ✕
-              </button>
-            </div>
-          ))}
-
-          <button
-            type="button"
-            onClick={() => set('al', [...(form.al || []), { start: '', end: '' }])}
-            style={{ ...btnGhost, marginTop: 4 }}
-          >
-            ➕ Add Leave
-          </button>
-        </div> */}
-
-        <div>
-          <label style={lbl}>Start Date *</label>
-          <input {...inp()} type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} />
+        {/* Start Date + End Date on same row */}
+        <div style={{ gridColumn: '1/-1', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div>
+            <label style={lbl}>Start Date *</label>
+            <input {...inp()} type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} />
+          </div>
+          <div>
+            <label style={lbl}>
+              End Date
+              <span onClick={() => setEndLocked(l => !l)} style={{
+                marginLeft: 8, fontSize: 10, cursor: 'pointer', userSelect: 'none',
+                color: endLocked ? '#f59e0b' : '#64748b',
+              }}>
+                {endLocked ? '🔒 locked' : '🔓 auto'}
+              </span>
+            </label>
+            <input {...inp()} type="date" value={form.endDate}
+              onChange={e => { setEndLocked(true); set('endDate', e.target.value) }} />
+          </div>
         </div>
 
-        <div>
-          <label style={lbl}>
-            End Date
-            <span onClick={() => setEndLocked(l => !l)} style={{
-              marginLeft: 8, fontSize: 10, cursor: 'pointer', userSelect: 'none',
-              color: endLocked ? '#f59e0b' : '#64748b',
-            }}>
-              {endLocked ? '🔒 locked' : '🔓 auto'}
-            </span>
-          </label>
-          <input {...inp()} type="date" value={form.endDate}
-            onChange={e => { setEndLocked(true); set('endDate', e.target.value) }} />
+        {/* Target UAT + Target LIVE on same row */}
+        <div style={{ gridColumn: '1/-1', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div>
+            <label style={lbl}>Target UAT <span style={{ fontSize: 10, color: '#64748b' }}>(optional)</span></label>
+            <input {...inp()} type="date" value={form.targetUAT} onChange={e => set('targetUAT', e.target.value)} />
+          </div>
+          <div>
+            <label style={lbl}>Target LIVE <span style={{ fontSize: 10, color: '#64748b' }}>(optional)</span></label>
+            <input {...inp()} type="date" value={form.targetLive} onChange={e => set('targetLive', e.target.value)} />
+          </div>
         </div>
 
+        {/* Progress — slider + number input together */}
         <div style={{ gridColumn: '1/-1' }}>
-          <label style={lbl}>Progress: <strong style={{ color: '#f8fafc' }}>{form.progress}%</strong></label>
-          <input type="range" min="0" max="100" step="5" value={form.progress}
-            onChange={e => set('progress', Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#3b82f6', marginBottom: 8 }} />
-          <ProgressBar pct={form.progress} />
-        </div>
+          <label style={lbl}>Progress</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <input type="range" min="0" max="100" step="5" value={form.progress}
+              onChange={e => set('progress', Number(e.target.value))}
+              style={{ flex: 1, accentColor: '#3b82f6' }} />
+            <input
+              type="number" min="0" max="100" step="1"
+              value={form.progress}
+              onChange={e => {
+                const val = e.target.value
+                // allow empty input
+                if (val === '') {
+                  set('progress', '')
+                  return
+                }
 
-        {/* <div>
-          <label style={lbl}>Priority</label>
-          <select {...inp()} value={form.priority} onChange={e => set('priority', e.target.value)}>
-            <option>High</option>
-            <option>Low</option>
-          </select>
-        </div> */}
+                const v = Math.min(100, Math.max(0, Number(val)))
+                set('progress', v)
+              }}
+              style={{
+                background: '#0f172a', border: '1px solid #334155', borderRadius: 8,
+                color: '#e2e8f0', padding: '6px 10px', fontSize: 13,
+                width: 68, outline: 'none', textAlign: 'center',
+              }}
+            />
+            <span style={{ color: '#64748b', fontSize: 13 }}>%</span>
+          </div>
+          <div style={{ marginTop: 8 }}><ProgressBar pct={form.progress} /></div>
+        </div>
 
         <div>
           <label style={lbl}>Status <span style={{ fontSize: 10, color: '#64748b' }}>(auto or override)</span></label>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <select {...inp({ style: { flex: 1 } })} value={form.status} onChange={e => set('status', e.target.value)}>
+            <select {...inp({ style: { flex: 1 } })} value={form.status} onChange={e => {
+                const val = e.target.value
+
+                set('status', val)
+
+                setIsManualStatus(val !== computed);
+
+              }}>
               <option>In Progress</option>
               <option>On Hold</option>
               <option>UAT</option>
+              <option>Upcoming</option>
+              <option>Completed</option>
             </select>
             <Badge label={computed} color={STATUS_COLOR[computed]} bg={STATUS_BG[computed]} />
           </div>
-        </div>
-
-        <div>
-          <label style={lbl}>Target UAT <span style={{ fontSize: 10, color: '#64748b' }}>(optional)</span></label>
-          <input {...inp()} type="date" value={form.targetUAT} onChange={e => set('targetUAT', e.target.value)} />
-        </div>
-
-        <div>
-          <label style={lbl}>Target LIVE <span style={{ fontSize: 10, color: '#64748b' }}>(optional)</span></label>
-          <input {...inp()} type="date" value={form.targetLive} onChange={e => set('targetLive', e.target.value)} />
         </div>
 
         <div style={{ gridColumn: '1/-1' }}>
