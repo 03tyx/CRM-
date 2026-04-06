@@ -1,5 +1,178 @@
+/* ============================================================
+   TaskForm.css
+   ============================================================ */
+@import './variables.css';
+@import './atoms.css';
+
+/* ── Form card ── */
+.task-form {
+  background: var(--bg-surface);
+  border-radius: var(--radius-2xl);
+  padding: 28px;
+  border: 1px solid var(--border-base);
+}
+
+.task-form__title {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* ── Field grid ── */
+.task-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.task-form__field--full { grid-column: 1 / -1; }
+
+.task-form__field--pair {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* ── Field label ── */
+.field-label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.field-label__hint {
+  font-size: 10px;
+  color: var(--text-faint);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.field-label__lock-toggle {
+  margin-left: 8px;
+  font-size: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.field-label__lock-toggle--locked { color: var(--yellow); }
+.field-label__lock-toggle--auto   { color: var(--text-faint); }
+
+/* ── Form inputs ── */
+.form-input,
+.form-select {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  color: var(--text-body);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--blue);
+}
+
+.form-input--readonly {
+  background: var(--bg-edit-inset);
+  color: var(--text-faint);
+  cursor: default;
+}
+
+/* ── Progress row ── */
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-row__range {
+  flex: 1;
+  accent-color: var(--blue);
+}
+
+.progress-row__number {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  color: var(--text-body);
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  width: 68px;
+  outline: none;
+  text-align: center;
+}
+
+.progress-row__unit {
+  color: var(--text-faint);
+  font-size: 13px;
+}
+
+.progress-bar-wrap { margin-top: 8px; }
+
+/* ── Status row ── */
+.status-row-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.status-select { flex: 1; }
+
+/* ── Form actions ── */
+.task-form__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  justify-content: flex-end;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-ghost:hover  { color: var(--text-body); border-color: #475569; }
+.btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-submit {
+  background: var(--gradient-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+
+/* for all field with date picker */
 input[type="date"] {
-  background-color: white;
+  background-color: #0F172A;
   color: rgb(255, 251, 251);
-  border: 1px solid #ccc;
+  /* border: 1px solid #ccc; */
 }

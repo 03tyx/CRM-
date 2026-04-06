@@ -1,5 +1,5 @@
 /* ===== GLOBAL INPUT ===== */
-.inp {
+/* .inp {
   background: #0f172a;
   border: 1px solid #334155;
   border-radius: 8px;
@@ -7,10 +7,10 @@
   padding: 8px 14px;
   font-size: 13px;
   outline: none;
-}
+} */
 
 /* ===== TABLE ===== */
-.table {
+/* .table {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
@@ -43,20 +43,20 @@
 .td {
   padding: 10px 12px;
   vertical-align: middle;
-}
+} */
 
 /* ===== BADGE ===== */
-.badge {
+/* .badge {
   border-radius: 6px;
   padding: 2px 10px;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
   white-space: nowrap;
-}
+} */
 
 /* ===== BUTTONS ===== */
-.btn {
+/* .btn {
   border: none;
   border-radius: 6px;
   padding: 4px 10px;
@@ -84,10 +84,10 @@
   font-size: 13px;
   cursor: pointer;
   font-weight: 600;
-}
+} */
 
 /* ===== PROGRESS ===== */
-.progressWrapper {
+/* .progressWrapper {
   background: #0f172a;
   border-radius: 99px;
   height: 6px;
@@ -115,10 +115,10 @@
 
 .progressFull {
   background: #22c55e;
-}
+} */
 
 /* ===== SUBTASK ===== */
-.subtaskBox {
+/* .subtaskBox {
   display: flex;
   gap: 8px;
   margin-bottom: 6px;
@@ -152,4 +152,236 @@
   padding: 6px 10px;
   font-size: 12px;
   cursor: pointer;
+} */
+
+/* ============================================================
+   TaskTable.css
+   ============================================================ */
+@import './variables.css';
+@import './atoms.css';
+
+/* ── Filter bar ── */
+.table-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.table-filter-input,
+.table-filter-select {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  color: var(--text-body);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.table-filter-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.table-filter-input:focus,
+.table-filter-select:focus {
+  border-color: var(--blue);
+}
+
+.table-filter-clear {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  color: #cbd5f5;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.table-filter-clear:hover {
+  border-color: var(--blue);
+  color: var(--blue-light);
+}
+
+/* ── Scroll wrapper ── */
+.table-scroll { overflow-x: auto; }
+
+/* ── Table ── */
+.task-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+/* ── Table head ── */
+.task-table thead tr {
+  background: var(--bg-inset);
+  border-bottom: 1px solid var(--border-header);
+}
+
+.th {
+  padding: 10px 12px;
+  text-align: left;
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 10px;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.th--active { color: var(--blue-light); }
+
+.th--static {
+  padding: 10px 12px;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.th--progress { min-width: 130px; }
+
+/* ── Table body ── */
+.task-row {
+  border-bottom: 1px solid #1e293b;
+  transition: background 0.15s;
+}
+
+.task-row:hover { background: var(--bg-row-hover); }
+
+.task-row--delayed {
+  background: rgba(239, 68, 68, 0.06);
+  border-left: 3px solid var(--red);
+}
+
+.task-row--delayed:hover { background: rgba(239, 68, 68, 0.10); }
+
+.task-row--editing {
+  background: var(--bg-row-edit);
+  border-bottom: none;
+  border-left: 3px solid var(--blue);
+}
+
+.task-row--normal { border-left: 3px solid transparent; }
+
+/* ── Cells ── */
+.td {
+  padding: 10px 12px;
+  vertical-align: middle;
+}
+
+.td-member {
+  color: var(--text-body);
+  font-weight: 600;
+}
+
+.td-project { color: var(--text-heading); font-weight: 500; max-width: 200px; }
+
+.td-project__uat,
+.td-project__live {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.td-project__overdue {
+  color: var(--red);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.td-manday    { text-align: center; color: var(--blue-light); }
+.td-date      { color: var(--text-body); }
+.td-date--due { color: var(--text-body); }
+.td-date--overdue { color: var(--red); }
+
+.td-progress {
+  min-width: 130px;
+}
+
+.td-progress__inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.td-progress__bar { flex: 1; }
+
+.td-progress__pct {
+  color: var(--text-muted);
+  font-size: 11px;
+  min-width: 30px;
+}
+
+.td-updated {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+/* ── Action buttons ── */
+.td-actions { display: flex; gap: 6px; }
+
+.btn-edit {
+  background: var(--blue-muted);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--blue);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-edit--open {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--yellow);
+}
+
+.btn-delete {
+  background: rgba(239, 68, 68, 0.15);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--red);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+/* ── Inline edit row ── */
+.task-row-edit td {
+  padding: 0 0 16px 0;
+  background: var(--bg-row-edit);
+  border-bottom: 2px solid var(--border-base);
+}
+
+.task-row-edit__inner {
+  padding: 16px 16px 0;
+}
+
+/* ── Empty state ── */
+.table-empty {
+  text-align: center;
+  color: var(--text-faint);
+  padding: 40px;
+  font-size: 13px;
+}
+
+/* ── Footer count ── */
+.table-footer {
+  margin-top: 12px;
+  color: var(--text-stat);
+  font-size: 11px;
 }

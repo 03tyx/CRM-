@@ -1,0 +1,487 @@
+/* ============================================================
+   ITBoard.css
+   ============================================================ */
+@import './variables.css';
+@import './deployment-table.css';
+
+/* ── Page header ── */
+.itboard__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.itboard__title {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.itboard__subtitle {
+  color: var(--text-dimmed);
+  font-size: 12px;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+.itboard__search {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  color: var(--text-body);
+  padding: 7px 12px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  outline: none;
+  width: 200px;
+  transition: border-color 0.15s;
+}
+
+.itboard__search:focus { border-color: var(--blue); }
+
+/* ── Member card list ── */
+.itboard__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.itboard__empty {
+  text-align: center;
+  color: var(--text-dimmed);
+  padding: 40px;
+  font-size: 13px;
+}
+
+/* ── Member card ── */
+.member-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-base);
+  overflow: hidden;
+}
+
+/* Clickable header row */
+.member-card__header {
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.member-card__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--gradient-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.member-card__name-wrap { flex: 1; min-width: 0; }
+
+.member-card__name {
+  color: var(--text-heading);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.member-card__meta {
+  color: var(--text-dimmed);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.member-card__chevron {
+  color: var(--text-faint);
+  font-size: 16px;
+}
+
+/* ── Expanded body ── */
+.member-card__body { border-top: 1px solid var(--bg-inset); }
+
+/* Tab bar */
+.member-card__tabs {
+  display: flex;
+  background: var(--bg-inset);
+  padding: 0 16px;
+  gap: 4px;
+}
+
+.member-card__tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dimmed);
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.member-card__tab:hover { color: var(--text-heading); }
+
+.member-card__tab--active {
+  border-bottom-color: var(--blue);
+  color: var(--blue);
+}
+
+.member-card__content { padding: 20px; }
+
+/* ── TasksSection (inside member card) ── */
+.tasks-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.tasks-section__label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.btn-add-new-entry {
+  background: var(--blue-muted);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: var(--radius-sm);
+  color: var(--blue);
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+/* Task mini-card */
+.task-mini-card {
+  background: var(--bg-inset);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  border: 1px solid var(--border-header);
+  margin-bottom: 8px;
+}
+
+.task-mini-card__inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.task-mini-card__body { flex: 1; min-width: 0; }
+
+.task-mini-card__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.task-mini-card__name {
+  color: var(--text-body);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.task-mini-card__dates {
+  display: flex;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--text-faint);
+  margin-top: 3px;
+}
+
+.task-mini-card__manday {
+  color: var(--text-faint);
+  font-size: 10px;
+}
+
+/* Mini progress bar */
+.task-mini-progress {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.task-mini-progress__track {
+  flex: 1;
+  background: var(--bg-surface);
+  border-radius: var(--radius-pill);
+  height: 4px;
+  overflow: hidden;
+}
+
+.task-mini-progress__fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: var(--transition-bar);
+  /* background set inline based on progress */
+}
+
+.task-mini-progress__pct {
+  color: #475569;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.task-mini-card__actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ── Annual Leave section ── */
+.al-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.al-section__label {
+  color: var(--text-dimmed);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* AL form */
+.al-form {
+  background: var(--bg-inset);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-base);
+}
+
+.al-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.al-form__label {
+  color: var(--text-faint);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.al-form__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.al-form__inp {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  color: var(--text-body);
+  padding: 7px 10px;
+  font-size: 12px;
+  font-family: var(--font-body);
+  width: 100%;
+  outline: none;
+}
+
+/* AL entry item */
+.al-entry {
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  border: 1px solid var(--border-base);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.al-entry__dates { color: var(--blue); font-weight: 600; font-size: 11px; }
+.al-entry__note  { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+.al-entry__badge { flex-shrink: 0; }
+.al-entry__actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+/* ── IT Deployment section (inside member card) ── */
+.it-dep-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* IT deployment card — same shell as dep-card but simpler */
+.it-dep-card {
+  background: var(--bg-inset);
+  border-radius: 10px;
+  border: 1px solid var(--border-header);
+  overflow: hidden;
+}
+
+.it-dep-card__header {
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-header);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.it-dep-card__title {
+  color: var(--text-heading);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.it-dep-card__date {
+  color: var(--text-dimmed);
+  font-size: 11px;
+  margin-left: 8px;
+}
+
+.it-dep-card__panel { padding: 14px; }
+
+/* ── IT Deployment Card (simple remark view) ── */
+.it-dep-remark-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  border: 1px solid var(--border-base);
+  font-size: 12px;
+}
+
+.it-dep-remark-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.it-dep-remark-card__body  { flex: 1; min-width: 0; }
+.it-dep-remark-card__name  { color: var(--text-heading); font-weight: 600; margin-bottom: 3px; }
+.it-dep-remark-card__text  { color: var(--text-muted); white-space: pre-wrap; line-height: 1.5; }
+.it-dep-remark-card__live  { color: var(--red); font-size: 11px; margin-top: 4px; font-weight: 600; }
+.it-dep-remark-card__empty { color: var(--border-base); font-size: 12px; padding: 10px 14px; font-style: italic; }
+
+/* ── Small shared form inputs (matching old smallInp) ── */
+.small-inp {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  color: var(--text-body);
+  padding: 5px 8px;
+  font-size: 11px;
+  font-family: var(--font-body);
+  outline: none;
+  width: 100%;
+}
+
+.small-inp:focus { border-color: var(--blue); }
+
+.small-ta {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-sm);
+  color: var(--text-body);
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: var(--font-body);
+  width: 100%;
+  outline: none;
+  resize: vertical;
+  min-height: 56px;
+}
+
+/* ── Shared micro-buttons ── */
+.btn-icon-edit {
+  background: none;
+  border: 1px solid var(--border-base);
+  border-radius: 5px;
+  color: var(--text-faint);
+  padding: 2px 7px;
+  font-size: 10px;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.btn-icon-delete {
+  background: none;
+  border: none;
+  color: var(--red);
+  padding: 2px 5px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+/* ── Scrum section (commented-out but styles kept for future use) ── */
+.scrum-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.scrum-section__label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.scrum-entry {
+  background: var(--bg-inset);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  border: 1px solid var(--border-header);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.scrum-entry__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.scrum-entry__date { color: var(--blue); font-weight: 700; font-size: 11px; }
+
+.scrum-entry__section-label {
+  color: #475569;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.scrum-entry__text { color: var(--text-secondary); white-space: pre-wrap; line-height: 1.5; }

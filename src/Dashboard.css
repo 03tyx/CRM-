@@ -1,0 +1,279 @@
+/* ============================================================
+   Dashboard.css
+   ============================================================ */
+@import './variables.css';
+@import './atoms.css';
+
+/* ── KPI row ── */
+.dashboard-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.kpi-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  padding: 18px 20px;
+  /* border-color injected inline per card for the accent tint */
+  border-width: 1px;
+  border-style: solid;
+}
+
+.kpi-card__icon  { font-size: 22px; margin-bottom: 6px; }
+
+.kpi-card__value {
+  font-size: 28px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  /* color injected inline per card */
+}
+
+.kpi-card__label {
+  font-size: 12px;
+  color: var(--text-dimmed);
+  margin-top: 2px;
+}
+
+/* ── Two-column mid section ── */
+.dashboard-mid-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* ── Shared panel style ── */
+.dash-panel {
+  background: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  border: 1px solid var(--border-base);
+}
+
+.dash-panel__title {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.dash-panel__title--mb { margin-bottom: 14px; }
+
+/* ── Team Availability ── */
+.avail-col-header {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px;
+  gap: 4px;
+  margin-bottom: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dimmed);
+  letter-spacing: 0.06em;
+}
+
+.avail-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--bg-inset);
+  font-size: 12px;
+}
+
+.avail-row__name {
+  color: var(--text-muted);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.avail-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+
+.avail-dot--free { background: var(--green); }
+.avail-dot--busy { background: var(--red); }
+
+.avail-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+}
+
+.avail-cell--free { color: var(--green); }
+.avail-cell--busy { color: var(--red); }
+
+.avail-summary {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--bg-inset);
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.avail-summary__label { color: var(--text-dimmed); }
+.avail-summary__value { color: var(--green); font-weight: 700; }
+
+/* ── Status overview ── */
+.status-row        { margin-bottom: 12px; }
+
+.status-row__header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.status-row__count {
+  color: var(--text-dimmed);
+  font-size: 12px;
+}
+
+.status-divider {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-base);
+}
+
+/* ── Workload section ── */
+.workload-panel {
+  background: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  border: 1px solid var(--border-base);
+  margin-bottom: 16px;
+}
+
+.workload-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.workload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.workload-row__name {
+  width: 140px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.workload-row__bar-wrap { flex: 1; }
+
+.workload-row__count {
+  width: 65px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.workload-row__delayed {
+  font-size: 11px;
+  color: var(--red);
+  flex-shrink: 0;
+}
+
+/* ── Active this week section ── */
+.active-week-panel {
+  background: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  border: 1px solid var(--border-base);
+  margin-bottom: 16px;
+}
+
+.active-week-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.active-week-item {
+  display: grid;
+  grid-template-columns: 10px 1fr 120px 120px 40px 100px; 
+  align-items: center;
+  gap: 10px;
+
+  padding: 8px 12px;
+  background: var(--bg-inset);
+  border-radius: var(--radius-md);
+  border-width: 1px;
+  border-style: solid;
+}
+
+.active-week-item__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+}
+
+.active-week-item__project {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.active-week-item__member {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.active-week-item__bar {
+  width: 100%;
+}
+
+.active-week-item__pct {
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ── Delayed alert ── */
+.delayed-alert {
+  background: var(--red-muted);
+  border: 1px solid var(--red-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.delayed-alert__title {
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.delayed-alert__row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(239, 68, 68, 0.1);
+  font-size: 12px;
+}
+
+.delayed-alert__member {
+  color: #fca5a5;
+  font-weight: 600;
+}
+
+.delayed-alert__sep   { color: var(--text-muted); }
+.delayed-alert__name  { color: var(--text-heading); flex: 1; }
+.delayed-alert__due   { color: var(--red); }
+.delayed-alert__prog  { color: var(--yellow); min-width: 35px; }
