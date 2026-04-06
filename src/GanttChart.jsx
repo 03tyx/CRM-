@@ -461,7 +461,7 @@
 // }
 
 // GanttChart.jsx
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef, useEffect } from 'react'
 import { IT_MEMBERS, computeStatus, STATUS_COLOR, today } from './helpers'
 import './GanttChart.css'
 
@@ -494,6 +494,7 @@ function buildCols(startDate, endDate) {
 
 export default function GanttChart({ tasks = [], leaves = [] }) {
   const [hoveredRow, setHoveredRow] = useState(null)
+  const scrollRef = useRef(null)
 
   // ── Time range ──────────────────────────────────────────────────────────────
   const { rangeStart, rangeEnd, cols } = useMemo(() => {
@@ -542,6 +543,14 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
   })()
 
   const oneMonthAgo = addDays(today, -30)
+
+  // ── Scroll to today on mount ─────────────────────────────────────────────
+  useEffect(() => {
+    if (!scrollRef.current || todayIdx < 0) return
+    // Centre today in the viewport, accounting for the sticky label column
+    const scrollLeft = todayIdx * COL_W - scrollRef.current.clientWidth / 2 + LABEL_W + COL_W / 2
+    scrollRef.current.scrollLeft = Math.max(0, scrollLeft)
+  }, [todayIdx])
 
   const byMember = useMemo(() => {
     const map = {}
@@ -630,7 +639,7 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
 
   return (
     <div className="gantt-root">
-      <div className="gantt-scroll">
+      <div className="gantt-scroll" ref={scrollRef}>
         <div className="gantt-inner" style={{ minWidth: totalW }}>
 
           {/* ── Sticky header ── */}
