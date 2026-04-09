@@ -16,6 +16,7 @@ function emptyDetail(deployDate = today) {
 function emptyRow(deployDate = today) {
   return {
     id:      uid(),
+    _itOwned: false,
     task:    { manual: '', feedbackLogId: '', feedbackLogUrl: '', feedbackLogLabel: '' },
     details: [emptyDetail(deployDate)],
   }
@@ -178,8 +179,10 @@ export default function DeploymentBoard({
   // const getPARows  = (dep) => (depRows[dep.id] || []).filter(row =>
   //   !row.details?.some(d => d._itOwned === true)
   // )
+  // const getPARows = (dep) =>
+  //   (depRows[dep.id] || []).filter(row => !row._itOwned)
   const getPARows = (dep) =>
-    (depRows[dep.id] || []).filter(row => !row._itOwned)
+    (depRows[dep.id] || []).filter(row => row._itOwned !== true)
   const addRow     = (dep)            => setRows(dep.id, rows => [...rows, emptyRow(dep.deploy_date)])
   const removeRow  = (depId, rowId)   => setRows(depId, rows => rows.filter(r => r.id !== rowId))
   const patchRowTask = (depId, rowId, task) =>
@@ -296,7 +299,8 @@ export default function DeploymentBoard({
           const envColor = ENV_COLOR[dep.environment] || '#64748b'
           // PA-owned rows only for the editable table; IT rows go to the read-only section below
           const rows     = getPARows(dep)
-          const allRows  = getRows(dep.id)   // for task count in header
+          //const allRows  = getRows(dep.id)   // for task count in header
+          const allRows = getPARows(dep)
 
           return (
             <div key={dep.id} className="dep-card" style={{ borderColor: `${envColor}35` }}>
@@ -308,7 +312,7 @@ export default function DeploymentBoard({
                   <div className="dep-card__subtitle">
                     📅 {dep.deploy_date} &nbsp;·&nbsp;
                     <span style={{ color: envColor }}>{dep.environment}</span>
-                    &nbsp;·&nbsp; {allRows.length} task{allRows.length !== 1 ? 's' : ''}
+                    {/* &nbsp;·&nbsp; {allRows.length} task{allRows.length !== 1 ? 's' : ''} */}
                     {dep.created_by && <> &nbsp;·&nbsp; by {dep.created_by.split(' ')[0]}</>}
                   </div>
                 </div>

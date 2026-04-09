@@ -343,7 +343,9 @@ function ITDeploymentSection({ itName, deployments = [], entries, getRows, saveR
     if (res.success) {
       const mainDep = deployments.find(d => d.id === depId)
       if (mainDep && syncToMainDeployment) {
-        const otherRows = (mainDep.rows || []).filter(row => !row.details.some(d => d.pic === itName))
+        // const otherRows = (mainDep.rows || []).filter(row => !row.details.some(d => d.pic === itName))
+        //const otherRows = (mainDep.rows || []).filter(row => !row._itOwned)
+        const otherRows = (mainDep.rows || []).filter(row => row._itOwned !== true)
         // const normalizeRows = (rows, itName) => rows.map(r => ({ ...r, details: r.details.map(d => ({ ...d, pic: d.pic || itName })) }))
         const normalizeRows = (rows, itName) => rows.map(r => ({
           ...r,
