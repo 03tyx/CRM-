@@ -410,7 +410,7 @@ function ITDeploymentSection({ itName, deployments = [], entries, getRows, saveR
                                 </td>
                               )}
                               <td className="dep-td" style={{ minWidth: 200 }}>
-                                <input className="dep-inp" value={d.remark} onChange={e => patchDetail(dep.id, row.id, d.id, { remark: e.target.value })} placeholder="Remark…" style={{ width: '100%' }} />
+                                <input className="dep-inp" value={d.remark} onChange={e => patchDetail(dep.id, row.id, d.id, { remark: e.target.value })} placeholder="e.g. #012 -xxx" style={{ width: '100%' }} />
                                 {!d.testingRequired && <div className="dep-no-testing-note">no testing required</div>}
                               </td>
                               <td className="dep-td" style={{ minWidth: 130 }}>

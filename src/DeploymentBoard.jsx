@@ -427,7 +427,7 @@ export default function DeploymentBoard({
                                       className="dep-inp"
                                       value={d.remark}
                                       onChange={e => patchDetail(dep.id, row.id, d.id, { remark: e.target.value })}
-                                      placeholder="Remark…"
+                                      placeholder="e.g. #012 -xxx"
                                       style={{ width: '100%' }}
                                     />
                                     {!d.testingRequired && (
