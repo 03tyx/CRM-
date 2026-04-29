@@ -191,7 +191,7 @@ function TasksSection({ itName, tasks, createTask, updateTask, deleteTask, savin
                     <div className="task-mini-card__top">
                       <span className="task-mini-card__name">{task.project}</span>
                       <Badge label={status} color={STATUS_COLOR[status]} bg={STATUS_BG[status]} />
-                      {/* {task.priority === 'High' && <Badge label="High" color="#ef4444" bg="rgba(239,68,68,0.1)" />} */}
+                      {task.priority === 'High' && <Badge label="High" color="#ef4444" bg="rgba(239,68,68,0.1)" />}
                     </div>
                     <div className="task-mini-card__dates">
                       {task.targetLive && <span>🎯 Live: {fmtDate(task.targetLive)}</span>}
@@ -339,25 +339,11 @@ function ITDeploymentSection({ itName, deployments = [], entries, getRows, saveR
 
   async function handleSave(depId) {
     const rows = getDepRows(depId)
-    const res  = await saveRows(depId, itName, rows)
+    // Write exclusively to this IT member's own it_entries record.
+    // Never touch the main deployment rows — PA saves and other IT member saves
+    // are fully isolated, preventing concurrent-save data loss.
+    const res = await saveRows(depId, itName, rows)
     if (res.success) {
-      const mainDep = deployments.find(d => d.id === depId)
-      if (mainDep && syncToMainDeployment) {
-        // const otherRows = (mainDep.rows || []).filter(row => !row.details.some(d => d.pic === itName))
-        //const otherRows = (mainDep.rows || []).filter(row => !row._itOwned)
-        const otherRows = (mainDep.rows || []).filter(row => row._itOwned !== true)
-        // const normalizeRows = (rows, itName) => rows.map(r => ({ ...r, details: r.details.map(d => ({ ...d, pic: d.pic || itName })) }))
-        const normalizeRows = (rows, itName) => rows.map(r => ({
-          ...r,
-          _itOwned: true, // mark entire row
-          details: r.details.map(d => ({
-            ...d,
-            pic: d.pic || itName,
-            _itOwned: true // mark detail too 
-          }))
-        }))
-        await syncToMainDeployment(depId, [...otherRows, ...normalizeRows(rows, itName)])
-      }
       setJustSaved(s => ({ ...s, [depId]: true }))
       setTimeout(() => setJustSaved(s => ({ ...s, [depId]: false })), 2000)
     } else {

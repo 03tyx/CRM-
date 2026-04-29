@@ -16,7 +16,6 @@ function emptyDetail(deployDate = today) {
 function emptyRow(deployDate = today) {
   return {
     id:      uid(),
-    _itOwned: false,
     task:    { manual: '', feedbackLogId: '', feedbackLogUrl: '', feedbackLogLabel: '' },
     details: [emptyDetail(deployDate)],
   }
@@ -163,31 +162,25 @@ export default function DeploymentBoard({
     setDepRows(current => {
       const next = { ...current }
       deployments.forEach(dep => {
-        if (!next[dep.id] && Array.isArray(dep.rows) && dep.rows.length > 0) {
-          next[dep.id] = dep.rows
+        // Only hydrate once (no local edits yet). Strip any _itOwned rows —
+        // depRows must be PA-only so PA Save never overwrites IT entries.
+        if (!next[dep.id]) {
+          next[dep.id] = (dep.rows || []).filter(r => r._itOwned !== true)
         }
       })
       return next
     })
   }, [deployments])
 
-  const getRows    = (depId)          => depRows[depId] || []
+  // depRows = PA-owned rows only. IT rows always read from itEntries prop (DB truth).
+  const getPARows  = (depId) => depRows[depId] || []
   const setRows    = (depId, updater) =>
     setDepRows(d => ({ ...d, [depId]: typeof updater === 'function' ? updater(d[depId] || []) : updater }))
-  // Only PA-owned rows go in the editable table — IT rows are identified by having a pic that
-  // matches an IT member name (set during IT Board sync). We expose a helper that filters them out.
-  // const getPARows  = (dep) => (depRows[dep.id] || []).filter(row =>
-  //   !row.details?.some(d => d._itOwned === true)
-  // )
-  // const getPARows = (dep) =>
-  //   (depRows[dep.id] || []).filter(row => !row._itOwned)
-  const getPARows = (dep) =>
-    (depRows[dep.id] || []).filter(row => row._itOwned !== true)
-  const addRow     = (dep)            => setRows(dep.id, rows => [...rows, emptyRow(dep.deploy_date)])
-  const removeRow  = (depId, rowId)   => setRows(depId, rows => rows.filter(r => r.id !== rowId))
+  const addRow       = (dep)              => setRows(dep.id, rows => [...rows, emptyRow(dep.deploy_date)])
+  const removeRow    = (depId, rowId)     => setRows(depId, rows => rows.filter(r => r.id !== rowId))
   const patchRowTask = (depId, rowId, task) =>
     setRows(depId, rows => rows.map(r => r.id === rowId ? { ...r, task } : r))
-  const addDetail  = (dep, rowId)   =>
+  const addDetail    = (dep, rowId)       =>
     setRows(dep.id, rows => rows.map(r =>
       r.id === rowId ? { ...r, details: [...r.details, emptyDetail(dep.deploy_date)] } : r
     ))
@@ -213,8 +206,11 @@ export default function DeploymentBoard({
   async function handleSave(depId) {
     setIsSaving(depId)
     try {
-      const rows = getRows(depId)
-      const res  = await saveRows(depId, rows)
+      // Save PA rows only — never write IT rows into the main deployment record.
+      // IT members write exclusively to their own it_entries row, so concurrent
+      // saves by different IT members never conflict with each other or with PA.
+      const paRows = getPARows(depId)
+      const res    = await saveRows(depId, paRows)
       if (!res.success) throw new Error(res.error)
       setJustSaved(s => ({ ...s, [depId]: true }))
       setTimeout(() => setJustSaved(s => ({ ...s, [depId]: false })), 2000)
@@ -225,41 +221,83 @@ export default function DeploymentBoard({
     }
   }
 
+  // Shared: resolve task label from a row's task object
+  function resolveTaskLabel(task) {
+    if (!task) return ''
+    const fl = FEEDBACK_LOGS.find(f => f.id === task.feedbackLogId)
+    if (task.feedbackLogId && task.feedbackLogId !== '__custom__') return fl?.label || task.manual || ''
+    if (task.feedbackLogId === '__custom__') return task.feedbackLogLabel || task.manual || ''
+    return task.manual || ''
+  }
+
+  // Shared: convert a flat list of rows → export-ready flat list of detail shapes
+  function rowsToExportShapes(rows) {
+    return rows.flatMap(row => {
+      const taskLabel = resolveTaskLabel(row.task)
+      const taskUrl   = row.task?.feedbackLogUrl || null
+      const flId      = row.task?.feedbackLogId
+      return (row.details || []).map(d => {
+        const isBug = d.discovery === 'bug'
+        let remark  = d.remark || ''
+        if (flId && flId !== '__custom__') remark = `#${flId} - ${remark}`
+        else if (flId === '__custom__' && row.task?.feedbackLogLabel) remark = `#${row.task.feedbackLogLabel} - ${remark}`
+        if (isBug) remark = `${remark} (bug)`
+        if (!d.testingRequired) remark = remark ? `${remark}\nno testing required` : 'no testing required'
+        return {
+          taskLabel, taskUrl, remarks: remark,
+          pic: d.discovery === 'self-discovered' ? '' : (d.pic || ''),
+          md: d.md || '', discovery: d.discovery,
+          testingRequired: d.testingRequired, deployLiveDate: d.liveDate || today,
+        }
+      })
+    })
+  }
+
+  // PA rows from local state + all IT members' rows from itEntries (DB truth, no duplication)
+  function getAllRows(depId) {
+    const paRows = getPARows(depId)
+    const itRows = itEntries
+      .filter(e => String(e.deployment_id) === String(depId))
+      .flatMap(e => e.rows || [])
+    return [...paRows, ...itRows]
+  }
+
   async function handleExport(dep) {
     setExporting(dep.id)
     try {
-      const deploymentRows = getRows(dep.id)
-      const itRows = itEntries
-        .filter(e => String(e.deployment_id) === String(dep.id))
-        .flatMap(e => e.rows || [])
-      const rows       = [...deploymentRows, ...itRows]
-      const exportRows = rows.flatMap(row => {
-        const fl        = FEEDBACK_LOGS.find(f => f.id === row.task.feedbackLogId)
-        const taskLabel = row.task.feedbackLogId && row.task.feedbackLogId !== '__custom__'
-          ? (fl?.label || row.task.manual || '')
-          : row.task.feedbackLogId === '__custom__'
-          ? (row.task.feedbackLogLabel || row.task.manual || '')
-          : (row.task.manual || '')
-        const taskUrl = row.task.feedbackLogUrl || null
-        const flId    = row.task.feedbackLogId
-
-        return row.details.map(d => {
-          const isBug = d.discovery === 'bug'
-          let remark  = d.remark || ''
-          if (flId && flId !== '__custom__') remark = `#${flId} - ${remark}`
-          else if (flId === '__custom__' && row.task.feedbackLogLabel) remark = `#${row.task.feedbackLogLabel} - ${remark}`
-          if (isBug) remark = `${remark} (bug)`
-          if (!d.testingRequired) remark = remark ? `${remark}\nno testing required` : 'no testing required'
-          return {
-            taskLabel, taskUrl, remarks: remark,
-            pic: d.discovery === 'self-discovered' ? '' : (d.pic || ''),
-            md: d.md || '', discovery: d.discovery,
-            testingRequired: d.testingRequired, deployLiveDate: d.liveDate || today,
-          }
-        })
-      })
+      const exportRows = rowsToExportShapes(getAllRows(dep.id))
       await exportDeploymentDocx({ deployment: dep, tasks: exportRows, liveDate: dep.deploy_date })
     } finally { setExporting(null) }
+  }
+
+  function handleCopy(dep) {
+    const lines = []
+    let idx = 0
+    for (const row of getAllRows(dep.id)) {
+      const taskLabel = resolveTaskLabel(row.task)
+      for (const d of row.details ?? []) {
+        const remark     = d.remark || ''
+        const isSelfDisc = d.discovery === 'self-discovered'
+        const isBug      = d.discovery === 'bug'
+        if (!remark && !isSelfDisc && !isBug) continue
+        idx++
+        const suffixes = []
+        if (isSelfDisc)         suffixes.push('(self-discovered)')
+        if (isBug)              suffixes.push('(bug)')
+        if (!d.testingRequired) suffixes.push('(no testing required)')
+        lines.push(`${idx}. ${taskLabel}: ${remark}${suffixes.length ? ' ' + suffixes.join(' ') : ''}`)
+      }
+    }
+    const text = lines.join('\n')
+    if (!text) { alert('No remarks to copy.'); return }
+    navigator.clipboard.writeText(text)
+      .then(() => alert('Copied to clipboard!'))
+      .catch(() => {
+        const ta = document.createElement('textarea')
+        ta.value = text; document.body.appendChild(ta); ta.select()
+        document.execCommand('copy'); document.body.removeChild(ta)
+        alert('Copied to clipboard!')
+      })
   }
 
   if (loading) return <div className="dep-loading">Loading…</div>
@@ -295,12 +333,10 @@ export default function DeploymentBoard({
       {/* ── Deployment cards ── */}
       <div className="dep-card-list">
         {deployments.map(dep => {
-          const expanded = expandedId === dep.id
-          const envColor = ENV_COLOR[dep.environment] || '#64748b'
-          // PA-owned rows only for the editable table; IT rows go to the read-only section below
-          const rows     = getPARows(dep)
-          //const allRows  = getRows(dep.id)   // for task count in header
-          const allRows = getPARows(dep)
+          const expanded   = expandedId === dep.id
+          const envColor   = ENV_COLOR[dep.environment] || '#64748b'
+          const rows       = getPARows(dep.id)          // PA rows for the editable table
+          const totalCount = getAllRows(dep.id).length  // PA + IT for the header count
 
           return (
             <div key={dep.id} className="dep-card" style={{ borderColor: `${envColor}35` }}>
@@ -312,7 +348,7 @@ export default function DeploymentBoard({
                   <div className="dep-card__subtitle">
                     📅 {dep.deploy_date} &nbsp;·&nbsp;
                     <span style={{ color: envColor }}>{dep.environment}</span>
-                    {/* &nbsp;·&nbsp; {allRows.length} task{allRows.length !== 1 ? 's' : ''} */}
+                    &nbsp;·&nbsp; {totalCount} task{totalCount !== 1 ? 's' : ''}
                     {dep.created_by && <> &nbsp;·&nbsp; by {dep.created_by.split(' ')[0]}</>}
                   </div>
                 </div>
@@ -329,6 +365,9 @@ export default function DeploymentBoard({
                   </button>
                   <button className="btn-export" onClick={() => handleExport(dep)} disabled={exporting === dep.id}>
                     {exporting === dep.id ? '⏳ Exporting…' : '📄 Export Word'}
+                  </button>
+                  <button className="btn-copy-remarks" onClick={() => handleCopy(dep)}>
+                    📋 Copy
                   </button>
                   <button className="btn-delete-dep" onClick={() => { if (confirm('Delete this deployment?')) deleteDeployment(dep.id) }}>
                     🗑️
