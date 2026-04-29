@@ -279,17 +279,21 @@ export default function DeploymentBoard({
         const remark     = d.remark || ''
         const isSelfDisc = d.discovery === 'self-discovered'
         const isBug      = d.discovery === 'bug'
-        if (!remark && !isSelfDisc && !isBug) continue
+        // Skip only if there is truly nothing to show — no task, no remark, no flags
+        if (!taskLabel && !remark && !isSelfDisc && !isBug) continue
         idx++
         const suffixes = []
         if (isSelfDisc)         suffixes.push('(self-discovered)')
         if (isBug)              suffixes.push('(bug)')
         if (!d.testingRequired) suffixes.push('(no testing required)')
-        lines.push(`${idx}. ${taskLabel}: ${remark}${suffixes.length ? ' ' + suffixes.join(' ') : ''}`)
+        const remarkPart = remark
+          ? `: ${remark}${suffixes.length ? ' ' + suffixes.join(' ') : ''}`
+          : suffixes.length ? ` ${suffixes.join(' ')}` : ''
+        lines.push(`${idx}. ${taskLabel}${remarkPart}`)
       }
     }
     const text = lines.join('\n')
-    if (!text) { alert('No remarks to copy.'); return }
+    if (!text) { alert('No tasks to copy.'); return }
     navigator.clipboard.writeText(text)
       .then(() => alert('Copied to clipboard!'))
       .catch(() => {
