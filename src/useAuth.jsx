@@ -109,3 +109,63 @@
 //     </AuthContext.Provider>
 //   )
 // }
+
+import { useState, useEffect, useCallback, createContext, useContext } from 'react'
+import { supabase } from './supabase'
+
+const AuthContext = createContext(null)
+
+export function useAuth() {
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used inside AuthProvider')
+  return ctx
+}
+
+export function AuthProvider(props) {
+  const { children } = props
+
+  const [session, setSession] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  // Removed profile logic (to keep your system SIMPLE & stable)
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setLoading(false)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session)
+        setLoading(false)
+      }
+    )
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const signIn = useCallback(async (email, password) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) return { success: false, error: error.message }
+    return { success: true }
+  }, [])
+
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut()
+  }, [])
+
+  const value = {
+    session,
+    loading,
+    signIn,
+    signOut,
+    currentEmail: session?.user?.email || '',
+    displayName: session?.user?.email?.split('@')[0] || 'User',
+  }
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
