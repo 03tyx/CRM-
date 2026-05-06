@@ -355,3 +355,24 @@
   margin-top: 2px;
   font-style: italic;
 }
+
+/* ── Show / Hide Test Scenarios ── */
+.btn-toggle-ts {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--white);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+/* When toggled (Hide state) */
+.btn-toggle-ts.active {
+  background: rgba(100, 116, 139, 0.15);
+  border: 1px solid var(--border-base);
+  color: var(--text-muted);
+}
