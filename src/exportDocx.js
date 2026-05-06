@@ -1,4 +1,4 @@
-//exportDocx.js
+//exportDocx.js (deployment list only, single page)
 // import {
 //   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
 //   AlignmentType, BorderStyle, WidthType, ShadingType, VerticalAlign,
@@ -275,7 +275,7 @@
 //   saveAs(blob, filename)
 // }
 
-// exportDocx.js
+// exportDocx.js (deployment list + test scenarios, 2 pages)
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, BorderStyle, WidthType, ShadingType, VerticalAlign,
@@ -349,20 +349,94 @@ function hyperlinkCell(label, url, opts = {}) {
 }
 
 // ── Strip HTML → plain text (for test scenarios) ──────────────────────────────
+// function htmlToPlainLines(html) {
+//   if (!html) return []
+//   const plain = html
+//     .replace(/<br\s*\/?>/gi, '\n')
+//     .replace(/<\/p>/gi, '\n')
+//     .replace(/<\/li>/gi, '\n')
+//     .replace(/<li[^>]*>/gi, '• ')
+//     .replace(/<[^>]+>/g, '')
+//     .replace(/&nbsp;/g, ' ')
+//     .replace(/&amp;/g, '&')
+//     .replace(/&lt;/g, '<')
+//     .replace(/&gt;/g, '>')
+//     .trim()
+//   return plain.split('\n').map(l => l.trim()).filter(Boolean)
+// }
+
 function htmlToPlainLines(html) {
   if (!html) return []
-  const plain = html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n')
-    .replace(/<\/li>/gi, '\n')
-    .replace(/<li[^>]*>/gi, '• ')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .trim()
-  return plain.split('\n').map(l => l.trim()).filter(Boolean)
+
+  const container = document.createElement('div')
+  container.innerHTML = html
+
+  const lines = []
+
+  function walk(node, context = { olStack: [] }) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent.trim()
+      if (text) lines.push(text)
+      return
+    }
+
+    if (node.nodeType !== Node.ELEMENT_NODE) return
+
+    const tag = node.tagName.toLowerCase()
+
+    // Handle <br>
+    if (tag === 'br') {
+      lines.push('\n')
+      return
+    }
+
+    // Handle ordered list
+    if (tag === 'ol') {
+      context.olStack.push(0)
+      node.childNodes.forEach(child => walk(child, context))
+      context.olStack.pop()
+      lines.push('\n')
+      return
+    }
+
+    // Handle unordered list
+    if (tag === 'ul') {
+      node.childNodes.forEach(child => walk(child, context))
+      lines.push('\n')
+      return
+    }
+
+    // Handle list item
+    if (tag === 'li') {
+      if (context.olStack.length > 0) {
+        // Ordered list
+        context.olStack[context.olStack.length - 1]++
+        const num = context.olStack[context.olStack.length - 1]
+        lines.push(`${num}. ${node.textContent.trim()}`)
+      } else {
+        // Unordered list
+        lines.push(`• ${node.textContent.trim()}`)
+      }
+      lines.push('\n')
+      return
+    }
+
+    // Block elements
+    const isBlock = ['div', 'p'].includes(tag)
+    if (isBlock) lines.push('\n')
+
+    node.childNodes.forEach(child => walk(child, context))
+
+    if (isBlock) lines.push('\n')
+  }
+
+  container.childNodes.forEach(node => walk(node))
+
+  return lines
+    .join('')
+    .split('\n')
+    .map(l => l.trim())
+    .filter(Boolean)
 }
 
 // ── Multi-line plain-text cell ────────────────────────────────────────────────
@@ -774,3 +848,4 @@ export async function exportDeploymentDocx({ deployment, tasks, liveDate }) {
   const blob = await Packer.toBlob(doc)
   saveAs(blob, filename)
 }
+
