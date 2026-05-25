@@ -27,7 +27,7 @@ export const FEEDBACK_LOGS = [
   { id: 'FL004', label: 'Advisor Onboarding Part 1 Feedback Log', url: 'https://docs.google.com/document/d/1lFHDjRj-aEeJZdreOLSdd7QwwgjZTOxl4By2UBnHZkY/edit?usp=sharing' },
   { id: 'FL005', label: 'League Ladder Feedback Log', url: 'https://docs.google.com/document/d/1OP41AmcKm7ChQMEnMMzj9347kN-HADY6KYp4EJ1nObM/edit?usp=sharing' },
   { id: 'FL006', label: 'Extra Feedback Log', url: 'https://docs.google.com/document/d/1hP_Z31zdLIfnuSj0g2TYgeitZQ-KtYVpQN9bs3iJNEk/edit?usp=sharing' },
-  { id: 'FL007', label: "Leader's VaultFeedback Log", url: 'https://docs.google.com/document/d/1CTG3hor31i5TZkZ8wwmqktIXO8sPNKmHTI_OQKRM3Lg/edit?tab=t.8p30lzvtbo8o' },
+  { id: 'FL007', label: "Leader's Vault Feedback Log", url: 'https://docs.google.com/document/d/1CTG3hor31i5TZkZ8wwmqktIXO8sPNKmHTI_OQKRM3Lg/edit?tab=t.8p30lzvtbo8o' },
 ]
 
 //remove 'Delayed' change 'Upcoming' to red colour
