@@ -275,7 +275,7 @@
 //   saveAs(blob, filename)
 // }
 
-// exportDocx.js (deployment list + test scenarios, 2 pages)
+// exportDocx.js
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, BorderStyle, WidthType, ShadingType, VerticalAlign,
@@ -348,35 +348,24 @@ function hyperlinkCell(label, url, opts = {}) {
   )
 }
 
-// ── Strip HTML → plain text (for test scenarios) ──────────────────────────────
-// function htmlToPlainLines(html) {
-//   if (!html) return []
-//   const plain = html
-//     .replace(/<br\s*\/?>/gi, '\n')
-//     .replace(/<\/p>/gi, '\n')
-//     .replace(/<\/li>/gi, '\n')
-//     .replace(/<li[^>]*>/gi, '• ')
-//     .replace(/<[^>]+>/g, '')
-//     .replace(/&nbsp;/g, ' ')
-//     .replace(/&amp;/g, '&')
-//     .replace(/&lt;/g, '<')
-//     .replace(/&gt;/g, '>')
-//     .trim()
-//   return plain.split('\n').map(l => l.trim()).filter(Boolean)
-// }
-
+// ── Strip HTML → plain lines preserving structure and empty lines ─────────────
+// Handles both toolbar-generated lists (<ol>/<ul><li>) and manually typed text.
+// Returns string[] where '' = blank line. Leading/trailing blanks trimmed.
 function htmlToPlainLines(html) {
   if (!html) return []
 
   const container = document.createElement('div')
   container.innerHTML = html
 
-  const lines = []
+  const result = []
 
-  function walk(node, context = { olStack: [] }) {
+  function walk(node, listType = null, listCounter = { n: 0 }, insideLi = false) {
+    // ── Text node ────────────────────────────────────────────────────────────
     if (node.nodeType === Node.TEXT_NODE) {
+      // Text inside <li> is handled at the <li> level — skip to avoid duplication
+      if (insideLi) return
       const text = node.textContent.trim()
-      if (text) lines.push(text)
+      if (text) result.push(text)
       return
     }
 
@@ -384,70 +373,89 @@ function htmlToPlainLines(html) {
 
     const tag = node.tagName.toLowerCase()
 
-    // Handle <br>
+    // ── <br> ─────────────────────────────────────────────────────────────────
     if (tag === 'br') {
-      lines.push('\n')
+      result.push('')
       return
     }
 
-    // Handle ordered list
+    // ── <ol> ─────────────────────────────────────────────────────────────────
     if (tag === 'ol') {
-      context.olStack.push(0)
-      node.childNodes.forEach(child => walk(child, context))
-      context.olStack.pop()
-      lines.push('\n')
+      const counter = { n: 0 }
+      node.childNodes.forEach(child => walk(child, 'ol', counter, false))
       return
     }
 
-    // Handle unordered list
+    // ── <ul> ─────────────────────────────────────────────────────────────────
     if (tag === 'ul') {
-      node.childNodes.forEach(child => walk(child, context))
-      lines.push('\n')
+      const counter = { n: 0 }
+      node.childNodes.forEach(child => walk(child, 'ul', counter, false))
       return
     }
 
-    // Handle list item
+    // ── <li> ─────────────────────────────────────────────────────────────────
     if (tag === 'li') {
-      if (context.olStack.length > 0) {
-        // Ordered list
-        context.olStack[context.olStack.length - 1]++
-        const num = context.olStack[context.olStack.length - 1]
-        lines.push(`${num}. ${node.textContent.trim()}`)
+      const text = node.textContent.trim()
+      if (!text) return
+      if (listType === 'ol') {
+        listCounter.n++
+        result.push(`${listCounter.n}. ${text}`)
       } else {
-        // Unordered list
-        lines.push(`• ${node.textContent.trim()}`)
+        result.push(`• ${text}`)
       }
-      lines.push('\n')
+      // Don't recurse into li children — we already grabbed textContent
       return
     }
 
-    // Block elements
-    const isBlock = ['div', 'p'].includes(tag)
-    if (isBlock) lines.push('\n')
+    // ── Block elements (<div>, <p>) ───────────────────────────────────────────
+    if (tag === 'div' || tag === 'p') {
+      if (result.length > 0) result.push('')
+      node.childNodes.forEach(child => walk(child, listType, listCounter, false))
+      return
+    }
 
-    node.childNodes.forEach(child => walk(child, context))
-
-    if (isBlock) lines.push('\n')
+    // ── Inline elements (<b>, <i>, <u>, <span>, etc.) ─────────────────────────
+    node.childNodes.forEach(child => walk(child, listType, listCounter, insideLi))
   }
 
-  container.childNodes.forEach(node => walk(node))
+  container.childNodes.forEach(node => walk(node, null, { n: 0 }, false))
 
-  return lines
-    .join('')
-    .split('\n')
-    .map(l => l.trim())
-    .filter(Boolean)
+  // Decode any leftover HTML entities (safety net)
+  const decoded = result.map(line =>
+    line
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g,  '&')
+      .replace(/&lt;/g,   '<')
+      .replace(/&gt;/g,   '>')
+      .replace(/&#39;/g,  "'")
+      .replace(/&quot;/g, '"')
+  )
+
+  // Collapse consecutive blank lines into one
+  const collapsed = []
+  for (const line of decoded) {
+    if (line === '' && collapsed[collapsed.length - 1] === '') continue
+    collapsed.push(line)
+  }
+
+  // Trim leading and trailing blank lines only
+  while (collapsed.length && collapsed[0] === '')                    collapsed.shift()
+  while (collapsed.length && collapsed[collapsed.length - 1] === '') collapsed.pop()
+
+  return collapsed
 }
 
 // ── Multi-line plain-text cell ────────────────────────────────────────────────
+// '' entries produce an empty paragraph (blank line in Word).
+// Each entry gets its own Paragraph so Word never concatenates lines.
 function multilineCell(lines, opts = {}) {
   if (!lines || lines.length === 0) {
     return makeCell([para(txt(''))], opts)
   }
-  const paragraphs = lines.map((line, i) =>
+  const paragraphs = lines.map(line =>
     new Paragraph({
       alignment: AlignmentType.LEFT,
-      spacing:   { after: i < lines.length - 1 ? 40 : 0 },
+      spacing:   { after: 0 },
       children:  [txt(line, { size: opts.size || 20, color: opts.color || '000000' })],
     })
   )
@@ -648,7 +656,8 @@ function buildTestBlocks(tasks) {
 
 // ── Page 1 table ──────────────────────────────────────────────────────────────
 function buildPage1Table(tasks, deployDateStr) {
-  const CW = [400, 2400, 4000, 1500, 1726]
+  // Landscape page: 15840 DXA wide, 720 margins each side → 14400 usable DXA
+  const CW = [400, 2400, 6274, 2200, 3126]  // # | Task | Remarks | PIC | Live on  → sum = 14400
   const TW = CW.reduce((a, b) => a + b, 0)
   const HEADER_FILL = 'BDD7EE'
 
@@ -695,7 +704,7 @@ function buildPage1Table(tasks, deployDateStr) {
   }
 
   return new Table({
-    width:        { size: 100, type: WidthType.PERCENTAGE },
+    width:        { size: TW, type: WidthType.DXA },
     columnWidths: CW,
     rows:         [headerRow, ...dataRows],
   })
@@ -705,8 +714,8 @@ function buildPage1Table(tasks, deployDateStr) {
 // Columns: # | Task | Remarks from iFAST | Test Scenarios from iFAST | PIC
 // Same task merged across its remark rows using rowSpan.
 function buildPage2Table(tasks) {
-  // CW: # | Task | Remarks | Test Scenarios | PIC
-  const CW = [400, 2200, 2600, 3000, 1226]
+  // Landscape page: 14400 DXA usable → # | Task | Remarks | Test Scenarios | PIC
+  const CW = [400, 2800, 3500, 5500, 2200]  // sum = 14400
   const TW = CW.reduce((a, b) => a + b, 0)
   const HEADER_FILL = 'E2EFDA'   // light green to distinguish from page 1
 
@@ -761,9 +770,7 @@ function buildPage2Table(tasks) {
 
         // Remarks — one row per remark
         const remarkLines = (item.remarks || '')
-          .split('\n')
-          .map(l => stripFLPrefix(l.trim()))
-          .filter(Boolean)
+          .split('\n').map(l => l.trim()).filter(Boolean)
         cells.push(multilineCell(
           remarkLines.length ? remarkLines : [''],
           { width: CW[2] }
@@ -791,7 +798,7 @@ function buildPage2Table(tasks) {
   }
 
   return new Table({
-    width:        { size: 100, type: WidthType.PERCENTAGE },
+    width:        { size: TW, type: WidthType.DXA },
     columnWidths: CW,
     rows:         [headerRow, ...dataRows],
   })
@@ -848,4 +855,3 @@ export async function exportDeploymentDocx({ deployment, tasks, liveDate }) {
   const blob = await Packer.toBlob(doc)
   saveAs(blob, filename)
 }
-
