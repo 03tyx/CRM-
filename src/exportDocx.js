@@ -312,10 +312,15 @@ function txt(text, opts = {}) {
   })
 }
 
+// ── Shared paragraph spacing — single line, no extra gaps ────────────────────
+// Google Docs interprets Word's spacing.after as margin. Setting everything to
+// line:240 (single) with before/after:0 produces clean paste into Google Docs.
+const SP = { before: 0, after: 0, line: 240, lineRule: 'auto' }
+
 function para(runs, align = AlignmentType.LEFT, opts = {}) {
   return new Paragraph({
     alignment: align,
-    spacing:   opts.spacing,
+    spacing:   opts.spacing || SP,
     indent:    opts.indent,
     children:  Array.isArray(runs) ? runs : [runs],
   })
@@ -343,29 +348,68 @@ function hyperlinkCell(label, url, opts = {}) {
     ],
   })
   return makeCell(
-    [new Paragraph({ alignment: opts.align || AlignmentType.LEFT, children: [link] })],
+    [new Paragraph({ alignment: opts.align || AlignmentType.LEFT, spacing: SP, children: [link] })],
     opts
   )
 }
 
-// ── Strip HTML → plain lines preserving structure and empty lines ─────────────
-// Handles both toolbar-generated lists (<ol>/<ul><li>) and manually typed text.
-// Returns string[] where '' = blank line. Leading/trailing blanks trimmed.
-function htmlToPlainLines(html) {
-  if (!html) return []
+// ── HTML → docx Paragraphs (rich: bold, italic, underline, lists, blank lines) ─
+// Walks the contentEditable HTML and produces an array of docx Paragraph objects
+// preserving all inline formatting exactly as the user typed/styled it.
+// Rules:
+//   • Each <div>/<p> → one Paragraph (no injected blank lines between them)
+//   • Blank <div>/<p> with no text → one empty Paragraph (preserves intentional blank lines)
+//   • <br> → ends the current paragraph, starts a new one
+//   • <ol><li> → numbered Paragraph with "N. " prefix built into the first TextRun
+//   • <ul><li> → bulleted Paragraph with "• " prefix
+//   • <b>/<strong> → bold TextRun
+//   • <i>/<em> → italic TextRun
+//   • <u> → underline TextRun
+//   • combinations (bold+italic etc.) → nested flags merged correctly
+function htmlToDocxParagraphs(html, baseSize = 20) {
+  if (!html) return [new Paragraph({ spacing: SP, children: [txt('')] })]
 
   const container = document.createElement('div')
   container.innerHTML = html
 
-  const result = []
+  const paragraphs = []
 
-  function walk(node, listType = null, listCounter = { n: 0 }, insideLi = false) {
-    // ── Text node ────────────────────────────────────────────────────────────
+  // Collect TextRuns for the current paragraph then flush it
+  function flushParagraph(runs, opts = {}) {
+    if (runs.length === 0) {
+      // Empty paragraph = intentional blank line
+      paragraphs.push(new Paragraph({ spacing: SP, children: [txt('')] }))
+      return
+    }
+    paragraphs.push(new Paragraph({
+      spacing:  SP,
+      indent:   opts.indent,
+      children: runs,
+    }))
+  }
+
+  // Walk a node tree collecting TextRun objects into `runs`.
+  // `fmt` carries the current inherited formatting flags.
+  function collectRuns(node, runs, fmt = {}) {
     if (node.nodeType === Node.TEXT_NODE) {
-      // Text inside <li> is handled at the <li> level — skip to avoid duplication
-      if (insideLi) return
-      const text = node.textContent.trim()
-      if (text) result.push(text)
+      const text = node.textContent
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g,  '&')
+        .replace(/&lt;/g,   '<')
+        .replace(/&gt;/g,   '>')
+        .replace(/&#39;/g,  "'")
+        .replace(/&quot;/g, '"')
+      if (text) {
+        runs.push(new TextRun({
+          text,
+          font:    'Arial',
+          size:    baseSize,
+          bold:    fmt.bold    || false,
+          italics: fmt.italic  || false,
+          underline: fmt.underline ? { type: 'single' } : undefined,
+          color:   fmt.color   || '000000',
+        }))
+      }
       return
     }
 
@@ -373,90 +417,123 @@ function htmlToPlainLines(html) {
 
     const tag = node.tagName.toLowerCase()
 
-    // ── <br> ─────────────────────────────────────────────────────────────────
+    // Inline formatting tags — merge flags and recurse
+    if (tag === 'b' || tag === 'strong') {
+      node.childNodes.forEach(c => collectRuns(c, runs, { ...fmt, bold: true }))
+      return
+    }
+    if (tag === 'i' || tag === 'em') {
+      node.childNodes.forEach(c => collectRuns(c, runs, { ...fmt, italic: true }))
+      return
+    }
+    if (tag === 'u') {
+      node.childNodes.forEach(c => collectRuns(c, runs, { ...fmt, underline: true }))
+      return
+    }
+    if (tag === 'span') {
+      // Handle inline style color if present
+      const color = node.style?.color
+      const hex   = color ? rgbToHex(color) : null
+      node.childNodes.forEach(c => collectRuns(c, runs, { ...fmt, ...(hex ? { color: hex } : {}) }))
+      return
+    }
+
+    // <br> inside a block → flush current runs as a paragraph, start fresh
     if (tag === 'br') {
-      result.push('')
+      flushParagraph(runs.splice(0))
       return
     }
 
-    // ── <ol> ─────────────────────────────────────────────────────────────────
-    if (tag === 'ol') {
-      const counter = { n: 0 }
-      node.childNodes.forEach(child => walk(child, 'ol', counter, false))
-      return
-    }
+    // Everything else — just recurse (don't produce block breaks inside collectRuns)
+    node.childNodes.forEach(c => collectRuns(c, runs, fmt))
+  }
 
-    // ── <ul> ─────────────────────────────────────────────────────────────────
-    if (tag === 'ul') {
-      const counter = { n: 0 }
-      node.childNodes.forEach(child => walk(child, 'ul', counter, false))
-      return
+  function processListItem(node, listType, counter) {
+    const runs = []
+    // Build prefix TextRun
+    let prefix
+    if (listType === 'ol') {
+      counter.n++
+      prefix = `${counter.n}. `
+    } else {
+      prefix = '• '
     }
+    runs.push(new TextRun({ text: prefix, font: 'Arial', size: baseSize, color: '000000' }))
+    node.childNodes.forEach(c => collectRuns(c, runs, {}))
+    flushParagraph(runs)
+  }
 
-    // ── <li> ─────────────────────────────────────────────────────────────────
-    if (tag === 'li') {
-      const text = node.textContent.trim()
-      if (!text) return
-      if (listType === 'ol') {
-        listCounter.n++
-        result.push(`${listCounter.n}. ${text}`)
-      } else {
-        result.push(`• ${text}`)
+  function processListNode(node, listType) {
+    const counter = { n: 0 }
+    node.childNodes.forEach(child => {
+      if (child.nodeType === Node.ELEMENT_NODE && child.tagName.toLowerCase() === 'li') {
+        processListItem(child, listType, counter)
       }
-      // Don't recurse into li children — we already grabbed textContent
-      return
-    }
-
-    // ── Block elements (<div>, <p>) ───────────────────────────────────────────
-    if (tag === 'div' || tag === 'p') {
-      if (result.length > 0) result.push('')
-      node.childNodes.forEach(child => walk(child, listType, listCounter, false))
-      return
-    }
-
-    // ── Inline elements (<b>, <i>, <u>, <span>, etc.) ─────────────────────────
-    node.childNodes.forEach(child => walk(child, listType, listCounter, insideLi))
+    })
   }
 
-  container.childNodes.forEach(node => walk(node, null, { n: 0 }, false))
-
-  // Decode any leftover HTML entities (safety net)
-  const decoded = result.map(line =>
-    line
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g,  '&')
-      .replace(/&lt;/g,   '<')
-      .replace(/&gt;/g,   '>')
-      .replace(/&#39;/g,  "'")
-      .replace(/&quot;/g, '"')
-  )
-
-  // Collapse consecutive blank lines into one
-  const collapsed = []
-  for (const line of decoded) {
-    if (line === '' && collapsed[collapsed.length - 1] === '') continue
-    collapsed.push(line)
+  function processBlock(node) {
+    // Collect all child content into runs for this block
+    const runs = []
+    node.childNodes.forEach(c => collectRuns(c, runs, {}))
+    flushParagraph(runs)
   }
 
-  // Trim leading and trailing blank lines only
-  while (collapsed.length && collapsed[0] === '')                    collapsed.shift()
-  while (collapsed.length && collapsed[collapsed.length - 1] === '') collapsed.pop()
+  // Top-level walk
+  container.childNodes.forEach(node => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent.trim()
+      if (text) {
+        const runs = []
+        collectRuns(node, runs, {})
+        flushParagraph(runs)
+      }
+      return
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return
 
-  return collapsed
+    const tag = node.tagName.toLowerCase()
+    if (tag === 'ol') { processListNode(node, 'ol'); return }
+    if (tag === 'ul') { processListNode(node, 'ul'); return }
+    if (tag === 'div' || tag === 'p') { processBlock(node); return }
+    if (tag === 'br') { flushParagraph([]); return }
+    // Inline at top level (shouldn't happen but handle gracefully)
+    const runs = []
+    collectRuns(node, runs, {})
+    if (runs.length) flushParagraph(runs)
+  })
+
+  return paragraphs.length
+    ? paragraphs
+    : [new Paragraph({ spacing: SP, children: [txt('')] })]
 }
 
-// ── Multi-line plain-text cell ────────────────────────────────────────────────
-// '' entries produce an empty paragraph (blank line in Word).
-// Each entry gets its own Paragraph so Word never concatenates lines.
+// ── RGB string → hex (for span color) ────────────────────────────────────────
+function rgbToHex(rgb) {
+  if (!rgb) return null
+  // Already hex?
+  if (rgb.startsWith('#')) return rgb.replace('#', '').toUpperCase()
+  const m = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
+  if (!m) return null
+  return [m[1], m[2], m[3]].map(n => parseInt(n).toString(16).padStart(2, '0')).join('').toUpperCase()
+}
+
+// ── Rich test-scenario cell ────────────────────────────────────────────────────
+function testScenarioCell(html, opts = {}) {
+  const paragraphs = htmlToDocxParagraphs(html, opts.size || 20)
+  return makeCell(paragraphs, opts)
+}
+
+// ── Multi-line plain-text cell (used for remarks in page 2) ───────────────────
+// Lines are plain strings; '' = intentional blank line.
 function multilineCell(lines, opts = {}) {
   if (!lines || lines.length === 0) {
-    return makeCell([para(txt(''))], opts)
+    return makeCell([new Paragraph({ spacing: SP, children: [txt('')] })], opts)
   }
   const paragraphs = lines.map(line =>
     new Paragraph({
-      alignment: AlignmentType.LEFT,
-      spacing:   { after: 0 },
-      children:  [txt(line, { size: opts.size || 20, color: opts.color || '000000' })],
+      spacing:  SP,
+      children: [txt(line, { size: opts.size || 20, color: opts.color || '000000' })],
     })
   )
   return makeCell(paragraphs, opts)
@@ -490,7 +567,7 @@ function remarksCell(remarksList, opts = {}) {
       paragraphs.push(
         new Paragraph({
           alignment: AlignmentType.LEFT,
-          spacing:   { after: 40 },
+          spacing:   SP,
           indent:    { left: 220 },
           children:  [txt('no testing required', { italic: true, color: 'FF0000', size: 18 })],
         })
@@ -502,7 +579,7 @@ function remarksCell(remarksList, opts = {}) {
       paragraphs.push(
         new Paragraph({
           alignment: AlignmentType.LEFT,
-          spacing:   { after: 20 },
+          spacing:   SP,
           children:  [txt(label, { size: 20 })],
         })
       )
@@ -582,8 +659,6 @@ function buildBlocks(tasks, deployDateStr) {
 // Groups by taskLabel+taskUrl. Within each task, each remark gets its own row
 // with its paired test scenario. Uses same sequential numbering as page 1.
 function buildTestBlocks(tasks) {
-  // We mirror the page-1 block ordering so sequence numbers match.
-  // Each entry: { taskLabel, taskUrl, remark, testScenarioLines, seqNo }
   const taskOrder = []
   const taskMap   = {}
 
@@ -594,7 +669,8 @@ function buildTestBlocks(tasks) {
     const isSelfDisc = t.discovery === 'self-discovered'
     const pic        = t.pic || '-'
     const remarks    = t.remarks || ''
-    const tsLines    = htmlToPlainLines(t.testScenario || '')
+    // Store raw HTML — rich formatting preserved for docx rendering
+    const testScenarioHtml = t.testScenario || ''
 
     if (!taskMap[taskKey]) {
       taskOrder.push(taskKey)
@@ -602,11 +678,10 @@ function buildTestBlocks(tasks) {
     }
 
     if (!isSelfDisc) {
-      taskMap[taskKey].details.push({ remarks, tsLines, pic })
+      taskMap[taskKey].details.push({ remarks, testScenarioHtml, pic })
     }
   }
 
-  // Flatten with sequential numbering matching page 1
   let seq = 0
   const rows = []
 
@@ -614,26 +689,16 @@ function buildTestBlocks(tasks) {
     const entry = taskMap[taskKey]
     if (entry.details.length === 0) continue
 
-    // How many (task, PIC) pairs exist — same logic as buildBlocks
-    // For test page we keep one row per remark (not per PIC grouping)
-    // but use the same seq numbers that page 1 assigns per (task, PIC) block.
-    // We simplify: seq increments per unique (task, PIC) as in buildBlocks.
     const picsSeen = new Set()
     for (const d of entry.details) {
-      const picKey = d.pic
-      if (!picsSeen.has(picKey)) {
-        picsSeen.add(picKey)
-        seq++
-      }
+      if (!picsSeen.has(d.pic)) { picsSeen.add(d.pic); seq++ }
     }
 
-    // Now emit one test-page row per remark (each remark is paired with its TS)
-    // Group by PIC first (same as page 1 block grouping)
     const picOrder = []
     const picMap   = {}
     for (const d of entry.details) {
       if (!picMap[d.pic]) { picOrder.push(d.pic); picMap[d.pic] = { pic: d.pic, items: [] } }
-      picMap[d.pic].items.push({ remarks: d.remarks, tsLines: d.tsLines })
+      picMap[d.pic].items.push({ remarks: d.remarks, testScenarioHtml: d.testScenarioHtml })
     }
 
     const startSeq = seq - picsSeen.size + 1
@@ -646,7 +711,7 @@ function buildTestBlocks(tasks) {
         taskUrl:    entry.taskUrl,
         pic,
         seqNo:      localSeq++,
-        remarkRows: items,   // [{remarks, tsLines}]
+        remarkRows: items,   // [{ remarks, testScenarioHtml }]
       })
     }
   }
@@ -768,19 +833,18 @@ function buildPage2Table(tasks) {
           cells.push(taskCell)
         }
 
-        // Remarks — one row per remark
+        // Remarks — strip FL prefix, one line per remark entry
         const remarkLines = (item.remarks || '')
-          .split('\n').map(l => l.trim()).filter(Boolean)
+          .split('\n')
+          .map(l => stripFLPrefix(l.trim()))
+          .filter(Boolean)
         cells.push(multilineCell(
           remarkLines.length ? remarkLines : [''],
           { width: CW[2] }
         ))
 
-        // Test Scenarios — one row per remark
-        cells.push(multilineCell(
-          item.tsLines.length ? item.tsLines : [''],
-          { width: CW[3] }
-        ))
+        // Test Scenarios — rich HTML → docx paragraphs with bold/italic/underline/lists
+        cells.push(testScenarioCell(item.testScenarioHtml || '', { width: CW[3] }))
 
         // PIC — rowSpan the entire block
         if (isFirst) {
@@ -830,21 +894,21 @@ export async function exportDeploymentDocx({ deployment, tasks, liveDate }) {
         // ── Page 1 ──────────────────────────────────────────────────────────
         new Paragraph({
           alignment: AlignmentType.CENTER,
-          spacing:   { before: 0, after: 160 },
+          spacing:   { before: 0, after: 160, line: 240, lineRule: 'auto' },
           children:  [txt('CRM Deployment List', { size: 32, bold: true })],
         }),
         page1Table,
 
         // ── Page break ──────────────────────────────────────────────────────
         new Paragraph({
+          spacing: SP,
           children: [new PageBreak()],
-          spacing:  { before: 0, after: 0 },
         }),
 
         // ── Page 2 ──────────────────────────────────────────────────────────
         new Paragraph({
           alignment: AlignmentType.CENTER,
-          spacing:   { before: 0, after: 160 },
+          spacing:   { before: 0, after: 160, line: 240, lineRule: 'auto' },
           children:  [txt(page2Title, { size: 28, bold: true })],
         }),
         page2Table,
