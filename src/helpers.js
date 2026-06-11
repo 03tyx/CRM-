@@ -28,6 +28,7 @@ export const FEEDBACK_LOGS = [
   { id: 'FL005', label: 'League Ladder Feedback Log', url: 'https://docs.google.com/document/d/1OP41AmcKm7ChQMEnMMzj9347kN-HADY6KYp4EJ1nObM/edit?usp=sharing' },
   { id: 'FL006', label: 'Extra Feedback Log', url: 'https://docs.google.com/document/d/1hP_Z31zdLIfnuSj0g2TYgeitZQ-KtYVpQN9bs3iJNEk/edit?usp=sharing' },
   { id: 'FL007', label: "Leader's Vault Feedback Log", url: 'https://docs.google.com/document/d/1CTG3hor31i5TZkZ8wwmqktIXO8sPNKmHTI_OQKRM3Lg/edit?tab=t.8p30lzvtbo8o' },
+  { id: 'FL008', label: "Room Booking 2.0 Feedback Log", url: 'https://docs.google.com/document/d/1m7CbKvfBPKlQuoF8vZiN7vzqzwtOje0YBYnQUviqBpA/edit?usp=sharing' },
 ]
 
 //remove 'Delayed' change 'Upcoming' to red colour
