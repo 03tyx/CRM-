@@ -32,6 +32,7 @@ export const FEEDBACK_LOGS = [
   { id: 'FL009', label: "REI 2.0 Feedback Log", url: 'https://docs.google.com/document/d/1R-UI1FamA0Y2dnaKkPfceVjSyfWAzUwaKaa057Sy90A/edit?usp=sharing' },
   { id: 'FL010', label: "GI Project Part 1 Feedback Log", url: 'https://docs.google.com/document/d/19zXrMCUdEAJ024FQNj_8jMamfpsGjtsXUG8ABZwKD9Q/edit?tab=t.u6pn7293rju4' },
   { id: 'FL011', label: "Advisor Onboarding Part 2 Feedback Log", url: 'https://docs.google.com/document/d/121elOPWhYTjrNbq4ybjgU8-RK1hqfkXlucJ36GAsHpk/edit?usp=sharing' },
+  { id: 'FL012', label: "BSC Module Feedback Log", url: 'https://docs.google.com/document/d/1yB_g3TEg-0bMOwto1DQ1OgIfnLFK15oAAk_hMg1oGrk/edit?usp=sharing' },
 ]
 
 //remove 'Delayed' change 'Upcoming' to red colour
