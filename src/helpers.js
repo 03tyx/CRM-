@@ -11,7 +11,7 @@ export const PA_MEMBERS = [
 ]
 
 export const IFA_MEMBERS = [
-  'Agnes', 'Alina', 'Angela', 'Eileen', 'Nicholas', 'Ying Xiang', 'Zach'
+  'Agnes', 'Alina', 'Angela', 'Eileen', 'Nicholas', 'Ying Xiang', 'Zach', 'Eugene'
 ]
 
 export const DISCOVERY_TYPES = [
