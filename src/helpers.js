@@ -94,6 +94,585 @@ export function computeStatus(task) {
   return task.status || 'In Progress'
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Project Health
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Check whether a date is a working day.
+ * Weekends (Saturday/Sunday) are excluded.
+ */
+// function isWorkingDay(dateStr) {
+//   if (!dateStr) return false
+
+//   const d = new Date(`${dateStr}T00:00:00`)
+//   const day = d.getDay()
+
+//   return day !== 0 && day !== 6
+// }
+
+// /**
+//  * Count working days between two dates, inclusive.
+//  *
+//  * If start > end, returns 0.
+//  */
+// export function countWorkingDays(startDate, endDate) {
+//   if (!startDate || !endDate) return 0
+
+//   const start = new Date(`${startDate}T00:00:00`)
+//   const end = new Date(`${endDate}T00:00:00`)
+
+//   if (start > end) return 0
+
+//   let count = 0
+//   const current = new Date(start)
+
+//   while (current <= end) {
+//     const iso = current.toISOString().split('T')[0]
+
+//     if (isWorkingDay(iso)) {
+//       count++
+//     }
+
+//     current.setDate(current.getDate() + 1)
+//   }
+
+//   return count
+// }
+
+// /**
+//  * Calculate the expected progress of a task based on working days elapsed.
+//  *
+//  * Expected Progress =
+//  * Working days elapsed / Total working days × 100
+//  *
+//  * The result is capped between 0 and 100.
+//  */
+// export function calculateExpectedProgress(task, referenceDate = today) {
+//   const startDate = task?.startDate || task?.start_date
+//   const endDate   = task?.endDate || task?.end_date
+
+//   if (!startDate || !endDate) return 0
+
+//   const totalWorkingDays = countWorkingDays(startDate, endDate)
+
+//   if (totalWorkingDays <= 0) return 0
+
+//   // Before task starts
+//   if (referenceDate < startDate) {
+//     return 0
+//   }
+
+//   // After task ends, expected progress is 100%
+//   if (referenceDate >= endDate) {
+//     return 100
+//   }
+
+//   const elapsedWorkingDays = countWorkingDays(startDate, referenceDate)
+
+//   return Math.min(
+//     100,
+//     Math.round((elapsedWorkingDays / totalWorkingDays) * 100)
+//   )
+// }
+
+// /**
+//  * Calculate Schedule Performance Ratio.
+//  *
+//  * Actual Progress / Expected Progress
+//  *
+//  * Returns a decimal ratio.
+//  * Example:
+//  * 76 actual / 80 expected = 0.95
+//  */
+// export function calculateSchedulePerformanceRatio(task, referenceDate = today) {
+//   const actualProgress = Number(task?.progress) || 0
+//   const expectedProgress = calculateExpectedProgress(task, referenceDate)
+
+//   // A task that has not started has no meaningful performance ratio yet.
+//   if (expectedProgress <= 0) return null
+
+//   return actualProgress / expectedProgress
+// }
+
+// /**
+//  * Determine project health independently from the normal task status.
+//  *
+//  * Priority:
+//  * 1. Completed
+//  * 2. Overdue
+//  * 3. Upcoming / not started
+//  * 4. Critical
+//  * 5. At Risk
+//  * 6. On Track
+//  */
+// export function computeProjectHealth(task, referenceDate = today) {
+//   const actualProgress = Math.max(
+//     0,
+//     Math.min(100, Number(task?.progress) || 0)
+//   )
+
+//   const startDate = task?.startDate || task?.start_date
+//   const endDate   = task?.endDate || task?.end_date
+
+//   // Completed always takes priority.
+//   if (actualProgress >= 100) {
+//     return {
+//       key: 'completed',
+//       label: 'Completed',
+//       icon: '✅',
+//       color: '#22c55e',
+//       bg: 'rgba(34,197,94,0.15)',
+//       expectedProgress: 100,
+//       actualProgress,
+//       performanceRatio: 1,
+//     }
+//   }
+
+//   // Due date has passed and task is not complete.
+//   if (endDate && referenceDate > endDate && actualProgress < 100) {
+//     const expectedProgress = calculateExpectedProgress(task, referenceDate)
+
+//     return {
+//       key: 'overdue',
+//       label: 'Overdue',
+//       icon: '⚠️',
+//       color: '#ef4444',
+//       bg: 'rgba(239,68,68,0.15)',
+//       expectedProgress,
+//       actualProgress,
+//       performanceRatio: expectedProgress > 0
+//         ? actualProgress / expectedProgress
+//         : null,
+//     }
+//   }
+
+//   // Task has not started yet.
+//   if (startDate && referenceDate < startDate) {
+//     return {
+//       key: 'upcoming',
+//       label: 'Upcoming',
+//       icon: '📅',
+//       color: '#64748b',
+//       bg: 'rgba(100,116,139,0.15)',
+//       expectedProgress: 0,
+//       actualProgress,
+//       performanceRatio: null,
+//     }
+//   }
+
+//   const expectedProgress = calculateExpectedProgress(task, referenceDate)
+//   const performanceRatio = calculateSchedulePerformanceRatio(task, referenceDate)
+
+//   // Avoid treating a 0% expected-progress task as Critical.
+//   if (performanceRatio === null) {
+//     return {
+//       key: 'on-track',
+//       label: 'On Track',
+//       icon: '🟢',
+//       color: '#22c55e',
+//       bg: 'rgba(34,197,94,0.15)',
+//       expectedProgress,
+//       actualProgress,
+//       performanceRatio: null,
+//     }
+//   }
+
+//   if (performanceRatio >= 0.90) {
+//     return {
+//       key: 'on-track',
+//       label: 'On Track',
+//       icon: '🟢',
+//       color: '#22c55e',
+//       bg: 'rgba(34,197,94,0.15)',
+//       expectedProgress,
+//       actualProgress,
+//       performanceRatio,
+//     }
+//   }
+
+//   if (performanceRatio >= 0.75) {
+//     return {
+//       key: 'at-risk',
+//       label: 'At Risk',
+//       icon: '🟠',
+//       color: '#f59e0b',
+//       bg: 'rgba(245,158,11,0.15)',
+//       expectedProgress,
+//       actualProgress,
+//       performanceRatio,
+//     }
+//   }
+
+//   return {
+//     key: 'critical',
+//     label: 'Critical',
+//     icon: '🔴',
+//     color: '#ef4444',
+//     bg: 'rgba(239,68,68,0.15)',
+//     expectedProgress,
+//     actualProgress,
+//     performanceRatio,
+//   }
+// }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Project Health
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Check whether a date is a working day.
+ *
+ * Monday-Friday = working day
+ * Saturday/Sunday = excluded
+ *
+ * Public holidays and annual leave are intentionally NOT excluded.
+ */
+// function isWorkingDay(dateStr) {
+//   if (!dateStr) return false
+
+//   const d = new Date(`${dateStr}T00:00:00`)
+//   const day = d.getDay()
+
+//   return day !== 0 && day !== 6
+// }
+
+function isWorkingDay(date) {
+  if (!(date instanceof Date) || isNaN(date)) return false
+
+  const day = date.getDay()
+
+  return day !== 0 && day !== 6
+}
+
+
+/**
+ * Count working days between two dates, inclusive.
+ *
+ * Example:
+ * 10 Aug (Mon) -> 14 Aug (Fri) = 5 working days
+ *
+ * Weekends are excluded.
+ * Public holidays and annual leave are counted as normal working days.
+ */
+// export function countWorkingDays(startDate, endDate) {
+//   if (!startDate || !endDate) return 0
+
+//   const start = new Date(`${startDate}T00:00:00`)
+//   const end = new Date(`${endDate}T00:00:00`)
+
+//   if (start > end) return 0
+
+//   let count = 0
+//   const current = new Date(start)
+
+//   while (current <= end) {
+//     const iso = current.toISOString().split('T')[0]
+
+//     if (isWorkingDay(iso)) {
+//       count++
+//     }
+
+//     current.setDate(current.getDate() + 1)
+//   }
+
+//   return count
+// }
+
+export function countWorkingDays(startDate, endDate) {
+  if (!startDate || !endDate) return 0
+
+  const start = new Date(`${startDate}T00:00:00`)
+  const end = new Date(`${endDate}T00:00:00`)
+
+  if (start > end) return 0
+
+  let count = 0
+  const current = new Date(start)
+
+  while (current <= end) {
+    if (isWorkingDay(current)) {
+      count++
+    }
+
+    current.setDate(current.getDate() + 1)
+  }
+
+  return count
+}
+
+
+/**
+ * Calculate expected project progress based on working days.
+ *
+ * Expected Progress =
+ *
+ *     Working Days Elapsed
+ *     -------------------- × 100
+ *     Total Working Days
+ *
+ * Rules:
+ * - Before start date       = 0%
+ * - On start date           = first working day of the project
+ * - On end date             = 100%
+ * - After end date          = 100%
+ * - Weekends are excluded
+ * - Public holidays counted
+ * - Annual leave counted
+ */
+export function calculateExpectedProgress(
+  task,
+  referenceDate = today
+) {
+  const startDate =
+    task?.startDate || task?.start_date
+
+  const endDate =
+    task?.endDate || task?.end_date
+
+  if (!startDate || !endDate) {
+    return 0
+  }
+
+  const totalWorkingDays =
+    countWorkingDays(startDate, endDate)
+
+  if (totalWorkingDays <= 0) {
+    return 0
+  }
+
+  // Project has not started.
+  if (referenceDate < startDate) {
+    return 0
+  }
+
+  // Project has reached/passed its end date.
+  if (referenceDate >= endDate) {
+    return 100
+  }
+
+  /*
+   * Count working days from the project start
+   * through the current/reference date.
+   *
+   * This includes the current working day.
+   */
+  const elapsedWorkingDays =
+    countWorkingDays(startDate, referenceDate)
+
+  return Math.min(
+    100,
+    Math.round(
+      (elapsedWorkingDays / totalWorkingDays) * 100
+    )
+  )
+}
+
+
+/**
+ * Calculate schedule performance ratio.
+ *
+ * Actual Progress / Expected Progress
+ *
+ * Example:
+ * Actual = 76%
+ * Expected = 80%
+ *
+ * Ratio = 0.95
+ */
+export function calculateSchedulePerformanceRatio(
+  task,
+  referenceDate = today
+) {
+  const actualProgress = Math.max(
+    0,
+    Math.min(100, Number(task?.progress) || 0)
+  )
+
+  const expectedProgress =
+    calculateExpectedProgress(task, referenceDate)
+
+  // Project has not started yet.
+  if (expectedProgress <= 0) {
+    return null
+  }
+
+  return actualProgress / expectedProgress
+}
+
+
+/**
+ * Determine project health.
+ *
+ * Health is based on actual progress compared with
+ * expected progress across the project's working days.
+ *
+ * Priority:
+ *
+ * 1. Completed
+ * 2. Overdue
+ * 3. Upcoming
+ * 4. Critical
+ * 5. At Risk
+ * 6. On Track
+ */
+export function computeProjectHealth(
+  task,
+  referenceDate = today
+) {
+  const actualProgress = Math.max(
+    0,
+    Math.min(100, Number(task?.progress) || 0)
+  )
+
+  const startDate =
+    task?.startDate || task?.start_date
+
+  const endDate =
+    task?.endDate || task?.end_date
+
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 1. Completed
+  // ─────────────────────────────────────────────────────────────────────────
+
+  if (actualProgress >= 100) {
+    return {
+      key: 'completed',
+      label: 'Completed',
+      icon: '✅',
+      color: '#22c55e',
+      bg: 'rgba(34,197,94,0.15)',
+      expectedProgress: 100,
+      actualProgress,
+      performanceRatio: 1,
+    }
+  }
+
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 2. Overdue
+  // ─────────────────────────────────────────────────────────────────────────
+
+  if (
+    endDate &&
+    referenceDate > endDate &&
+    actualProgress < 100
+  ) {
+    const expectedProgress =
+      calculateExpectedProgress(task, referenceDate)
+
+    return {
+      key: 'overdue',
+      label: 'Overdue',
+      icon: '⚠️',
+      color: '#ef4444',
+      bg: 'rgba(239,68,68,0.15)',
+      expectedProgress,
+      actualProgress,
+      performanceRatio:
+        expectedProgress > 0
+          ? actualProgress / expectedProgress
+          : null,
+    }
+  }
+
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 3. Upcoming
+  // ─────────────────────────────────────────────────────────────────────────
+
+  if (
+    startDate &&
+    referenceDate < startDate
+  ) {
+    return {
+      key: 'upcoming',
+      label: 'Upcoming',
+      icon: '📅',
+      color: '#64748b',
+      bg: 'rgba(100,116,139,0.15)',
+      expectedProgress: 0,
+      actualProgress,
+      performanceRatio: null,
+    }
+  }
+
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 4-6. On Track / At Risk / Critical
+  // ─────────────────────────────────────────────────────────────────────────
+
+  const expectedProgress =
+    calculateExpectedProgress(
+      task,
+      referenceDate
+    )
+
+  const performanceRatio =
+    calculateSchedulePerformanceRatio(
+      task,
+      referenceDate
+    )
+
+
+  if (performanceRatio === null) {
+    return {
+      key: 'on-track',
+      label: 'On Track',
+      icon: '🟢',
+      color: '#22c55e',
+      bg: 'rgba(34,197,94,0.15)',
+      expectedProgress,
+      actualProgress,
+      performanceRatio: null,
+    }
+  }
+
+
+  // ≥ 90% of expected progress
+  if (performanceRatio >= 0.90) {
+    return {
+      key: 'on-track',
+      label: 'On Track',
+      icon: '🟢',
+      color: '#22c55e',
+      bg: 'rgba(34,197,94,0.15)',
+      expectedProgress,
+      actualProgress,
+      performanceRatio,
+    }
+  }
+
+
+  // 75%-89% of expected progress
+  if (performanceRatio >= 0.75) {
+    return {
+      key: 'at-risk',
+      label: 'At Risk',
+      icon: '🟠',
+      color: '#f59e0b',
+      bg: 'rgba(245,158,11,0.15)',
+      expectedProgress,
+      actualProgress,
+      performanceRatio,
+    }
+  }
+
+
+  // < 75% of expected progress
+  return {
+    key: 'critical',
+    label: 'Critical',
+    icon: '🔴',
+    color: '#ef4444',
+    bg: 'rgba(239,68,68,0.15)',
+    expectedProgress,
+    actualProgress,
+    performanceRatio,
+  }
+}
+
 // Map camelCase form fields → snake_case DB columns
 export function toDb(form) {
   return {

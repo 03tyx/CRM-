@@ -216,6 +216,7 @@
 //   )
 // }
 
+//App.jsx
 import { useState, useMemo } from 'react'
 import { AuthProvider, useAuth } from './useAuth'
 import { useTasks } from './useTasks'
@@ -231,13 +232,14 @@ import DeploymentBoard from './DeploymentBoard'
 import Dashboard from './Dashboard'
 import ITBoard from './ITBoard'
 import AuditLog from './AuditLog'
+import AdminPanel from './AdminPanel'
 import { computeStatus } from './helpers'
 import './App.css'
 
 // ── Inner app ───────────────────────────────────────────────────────────────
 function AppInner() {
-  const { session, loading: authLoading, displayName, signOut } = useAuth()
-  const { log } = useAuditLog()
+  const { session, profile, loading: authLoading, displayName, role, isSuperAdmin, isDisabled, signOut } = useAuth()
+  const { log } = useAuditLog({ read: isSuperAdmin })
 
   const { tasks, loading: tasksLoading, saving: tasksSaving,
           error, createTask, updateTask, deleteTask } = useTasks()
@@ -274,6 +276,16 @@ function AppInner() {
 
   if (!session) return <LoginPage />
 
+  if (isDisabled) {
+    return (
+      <div className="app-shell">
+        <div className="state-error" style={{ margin: 24 }}>
+          Your account access is disabled. Contact an administrator.
+        </div>
+      </div>
+    )
+  }
+
   // ── Tabs ─────────────────────────────────────────────────────────────────
   const TABS = [
     { id: 'dashboard',  label: '📊 Dashboard' },
@@ -281,10 +293,14 @@ function AppInner() {
     { id: 'gantt',      label: '📅 Timeline' },
     { id: 'deployment', label: '🚀 Deployment' },
     { id: 'itboard',    label: '💻 IT Board' },
-    { id: 'audit',      label: '🔍 Audit Log' },
+    ...(isSuperAdmin ? [
+      { id: 'audit', label: '🔍 Audit Log' },
+      { id: 'admin', label: 'Admin' },
+    ] : []),
   ]
 
   function switchTab(id) {
+    if (!TABS.some(t => t.id === id)) return
     setTab(id)
     setShowNewForm(false)
   }
@@ -440,6 +456,7 @@ function AppInner() {
 
           <div className="header-user">
             <span className="header-user__name">{displayName}</span>
+            <span className="header-user__role">{role}</span>
           </div>
 
           <button className="btn-signout" onClick={signOut}>
@@ -541,7 +558,9 @@ function AppInner() {
               />
             )}
 
-            {tab === 'audit' && <AuditLog />}
+            {isSuperAdmin && tab === 'audit' && <AuditLog />}
+
+            {isSuperAdmin && tab === 'admin' && <AdminPanel currentUserId={profile?.id} />}
           </>
         )}
       </div>
@@ -557,3 +576,6 @@ export default function App() {
     </AuthProvider>
   )
 }
+
+
+

@@ -1,16 +1,24 @@
+// useAuditLog.js
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from './supabase'
 
 const TABLE = 'audit_logs'
 const PAGE  = 100
 
-export function useAuditLog() {
+export function useAuditLog({ read = true } = {}) {
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [total, setTotal] = useState(0)
   const [page, setPageState] = useState(0)
 
   const fetchLogs = useCallback(async (pageNum = 0) => {
+    if (!read) {
+      setLogs([])
+      setTotal(0)
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
 
     const from = pageNum * PAGE
@@ -32,10 +40,12 @@ export function useAuditLog() {
     }
 
     setLoading(false)
-  }, [])
+  }, [read])
 
   useEffect(() => {
     fetchLogs(0)
+
+    if (!read) return undefined
 
     const channel = supabase
       .channel('audit-logs-rt')
@@ -50,11 +60,10 @@ export function useAuditLog() {
       .subscribe()
 
     return () => {
-      channel.unsubscribe() // ✅ correct cleanup
+      channel.unsubscribe()
     }
-  }, [fetchLogs])
+  }, [fetchLogs, read])
 
-  // ── Insert audit log ───────────────────────────────────────────────
   const log = useCallback(async ({
     actorEmail,
     actorName,
@@ -69,7 +78,6 @@ export function useAuditLog() {
         action,
         target,
         detail,
-        // ❌ removed created_at → let DB handle
       }])
     } catch (e) {
       console.error('audit log failed:', e)

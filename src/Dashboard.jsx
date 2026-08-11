@@ -233,9 +233,13 @@
 //   )
 // }
 
+//Dashboard.jsx
 import { useMemo } from 'react'
-import { IT_MEMBERS, computeStatus, STATUS_COLOR, STATUS_BG, today } from './helpers'
+import { useAuth } from './useAuth'
+import { computeStatus, computeProjectHealth, STATUS_COLOR, STATUS_BG, today } from './helpers'
 import './Dashboard.css'
+
+
 
 function Badge({ label, color, bg }) {
   return (
@@ -277,6 +281,7 @@ function weekStart(offset = 0) {
 }
 
 export default function Dashboard({ tasks }) {
+  const { activeMembers } = useAuth()
   const thisWkStart = weekStart(0)
   const thisWkEnd   = weekEnd(0)
   const nextWkStart = weekStart(1)
@@ -288,21 +293,87 @@ export default function Dashboard({ tasks }) {
     return counts
   }, [tasks])
 
-  const availability = useMemo(() => IT_MEMBERS.map(m => {
-    const active = tasks.filter(t => t.itName === m && computeStatus(t) !== 'Completed')
-    const busy = (wkS, wkE) => active.some(t => t.startDate <= wkE && (t.endDate >= wkS))
-    const delayed = active.filter(t => computeStatus(t) === 'Delayed').length
-    return {
-      m,
-      thisWeekFree: !busy(thisWkStart, thisWkEnd),
-      nextWeekFree: !busy(nextWkStart, nextWkEnd),
-      delayed,
-      load: active.length,
-      active,
-    }
-  }), [tasks, thisWkStart, thisWkEnd, nextWkStart, nextWkEnd])
+  // const availability = useMemo(() => IT_MEMBERS.map(m => {
+  //   const active = tasks.filter(t => t.itName === m && computeStatus(t) !== 'Completed')
+  //   const busy = (wkS, wkE) => active.some(t => t.startDate <= wkE && (t.endDate >= wkS))
+  //   const delayed = active.filter(t => computeStatus(t) === 'Delayed').length
+  //   return {
+  //     m,
+  //     thisWeekFree: !busy(thisWkStart, thisWkEnd),
+  //     nextWeekFree: !busy(nextWkStart, nextWkEnd),
+  //     delayed,
+  //     load: active.length,
+  //     active,
+  //   }
+  // }), [tasks, thisWkStart, thisWkEnd, nextWkStart, nextWkEnd])
+
+  const availability = useMemo(() => {
+    const members = (activeMembers || [])
+      .filter(member =>
+        member.role === 'it_user' &&
+        member.status === 'active' &&
+        member.it_name
+      )
+      .map(member => member.it_name)
+      .filter(
+        (name, index, array) =>
+          array.indexOf(name) === index
+      )
+      .sort((a, b) => a.localeCompare(b))
+
+    return members.map(m => {
+      const active = tasks.filter(
+        t =>
+          t.itName === m &&
+          computeStatus(t) !== 'Completed'
+      )
+
+      const busy = (wkS, wkE) =>
+        active.some(
+          t =>
+            t.startDate <= wkE &&
+            t.endDate >= wkS
+        )
+
+      const delayed = active.filter(
+        t => computeStatus(t) === 'Delayed'
+      ).length
+
+      return {
+        m,
+        thisWeekFree: !busy(
+          thisWkStart,
+          thisWkEnd
+        ),
+        nextWeekFree: !busy(
+          nextWkStart,
+          nextWkEnd
+        ),
+        delayed,
+        load: active.length,
+        active,
+      }
+    })
+  }, [
+    activeMembers,
+    tasks,
+    thisWkStart,
+    thisWkEnd,
+    nextWkStart,
+    nextWkEnd,
+  ])
 
   const delayed      = tasks.filter(t => computeStatus(t) === 'Delayed')
+  const healthDist = useMemo(() => {
+  const counts = {}
+
+  tasks.forEach(task => {
+    const health = computeProjectHealth(task)
+    counts[health.key] = (counts[health.key] || 0) + 1
+  })
+
+  return counts
+}, [tasks])
   const total        = tasks.length
   const completed    = tasks.filter(t => computeStatus(t) === 'Completed').length
   const avgProg      = total ? Math.round(tasks.reduce((s, t) => s + t.progress, 0) / total) : 0
@@ -349,7 +420,10 @@ export default function Dashboard({ tasks }) {
           ))}
           <div className="avail-summary">
             <span className="avail-summary__label">Available this week</span>
-            <span className="avail-summary__value">{availableNow} / {IT_MEMBERS.length} members</span>
+            {/* <span className="avail-summary__value">{availableNow} / {IT_MEMBERS.length} members</span> */}
+            <span className="avail-summary__value">
+              {availableNow} / {availability.length} members
+            </span>
           </div>
         </div>
 
@@ -372,6 +446,76 @@ export default function Dashboard({ tasks }) {
           ))}
           <div className="status-divider" />
         </div>
+      </div>
+
+      <div className="dash-panel project-health-panel">
+        <h3 className="dash-panel__title dash-panel__title--mb">
+          ❤️ Project Health
+        </h3>
+
+        {[
+          {
+            key: 'on-track',
+            label: 'On Track',
+            icon: '🟢',
+            color: '#22c55e',
+          },
+          {
+            key: 'at-risk',
+            label: 'At Risk',
+            icon: '🟠',
+            color: '#f59e0b',
+          },
+          {
+            key: 'critical',
+            label: 'Critical',
+            icon: '🔴',
+            color: '#ef4444',
+          },
+          {
+            key: 'overdue',
+            label: 'Overdue',
+            icon: '⚠️',
+            color: '#ef4444',
+          },
+          {
+            key: 'completed',
+            label: 'Completed',
+            icon: '✅',
+            color: '#22c55e',
+          },
+        ].map(h => {
+          const count = healthDist[h.key] || 0
+          const percentage = total
+            ? (count / total) * 100
+            : 0
+
+          return (
+            <div key={h.key} className="status-row">
+              <div className="status-row__header">
+                <span style={{ color: h.color }}>
+                  {h.icon} {h.label}
+                </span>
+
+                <span className="status-row__count">
+                  {count} task{count !== 1 ? 's' : ''}
+                </span>
+              </div>
+
+              <div className="progress-track progress-track--sm">
+                <div
+                  className="progress-fill"
+                  style={{
+                    width: `${percentage}%`,
+                    background: h.color,
+                  }}
+                />
+              </div>
+            </div>
+          )
+        })}
+
+        <div className="status-divider" />
       </div>
 
       {/* ── Workload ── */}
@@ -413,18 +557,54 @@ export default function Dashboard({ tasks }) {
             })
             .map(t => {
               const st = computeStatus(t)
+              const health = computeProjectHealth(t)
               return (
+                // <div
+                //   key={t.id}
+                //   className="active-week-item"
+                //   style={{ borderColor: `${STATUS_COLOR[st]}20` }}
+                // >
+                //   <div className="active-week-item__dot" style={{ background: STATUS_COLOR[st] }} />
+                //   <div className="active-week-item__project">{t.project}</div>
+                //   <div className="active-week-item__member">{t.itName}</div>
+                //   <div className="active-week-item__bar"><ProgressBar pct={t.progress} /></div>
+                //   <div className="active-week-item__pct">{t.progress}%</div>
+                //   <Badge label={st} color={STATUS_COLOR[st]} bg={STATUS_BG[st]} />
+                // </div>
                 <div
                   key={t.id}
                   className="active-week-item"
-                  style={{ borderColor: `${STATUS_COLOR[st]}20` }}
+                  style={{
+                    borderColor: `${health.color}55`,
+                    borderLeft: `4px solid ${health.color}`,
+                  }}
                 >
-                  <div className="active-week-item__dot" style={{ background: STATUS_COLOR[st] }} />
-                  <div className="active-week-item__project">{t.project}</div>
-                  <div className="active-week-item__member">{t.itName}</div>
-                  <div className="active-week-item__bar"><ProgressBar pct={t.progress} /></div>
-                  <div className="active-week-item__pct">{t.progress}%</div>
-                  <Badge label={st} color={STATUS_COLOR[st]} bg={STATUS_BG[st]} />
+                  <div
+                    className="active-week-item__dot"
+                    style={{ background: health.color }}
+                  />
+
+                  <div className="active-week-item__project">
+                    {t.project}
+                  </div>
+
+                  <div className="active-week-item__member">
+                    {t.itName}
+                  </div>
+
+                  <div className="active-week-item__bar">
+                    <ProgressBar pct={t.progress} />
+                  </div>
+
+                  <div className="active-week-item__pct">
+                    {t.progress}%
+                  </div>
+
+                  <Badge
+                    label={`${health.icon} ${health.label}`}
+                    color={health.color}
+                    bg={health.bg}
+                  />
                 </div>
               )
             })}
@@ -432,7 +612,7 @@ export default function Dashboard({ tasks }) {
       </div>
 
       {/* ── Delayed Alert ── */}
-      {delayed.length > 0 && (
+      {/* {delayed.length > 0 && (
         <div className="delayed-alert">
           <h3 className="delayed-alert__title">
             ⚠️ Overdue Tasks — Needs Attention ({delayed.length})
@@ -446,6 +626,73 @@ export default function Dashboard({ tasks }) {
               <span className="delayed-alert__prog">{t.progress}%</span>
             </div>
           ))}
+        </div>
+      )} */}
+
+      {/* ── Project Health Alert ── */}
+      {tasks.some(t => {
+        const health = computeProjectHealth(t)
+        return ['critical', 'at-risk', 'overdue'].includes(health.key)
+      }) && (
+        <div className="delayed-alert">
+          <h3 className="delayed-alert__title">
+            ⚠️ Projects Requiring Attention
+          </h3>
+
+          {tasks
+            .map(t => ({
+              task: t,
+              health: computeProjectHealth(t),
+            }))
+            .filter(({ health }) =>
+              ['critical', 'at-risk', 'overdue'].includes(health.key)
+            )
+            .map(({ task: t, health }) => (
+              <div
+                key={t.id}
+                className="delayed-alert__row"
+                style={{
+                  borderLeft: `4px solid ${health.color}`,
+                }}
+              >
+                <span
+                  className="delayed-alert__member"
+                  style={{ color: health.color }}
+                >
+                  {health.icon} {health.label}
+                </span>
+
+                <span className="delayed-alert__sep">—</span>
+
+                <span className="delayed-alert__name">
+                  {t.project}
+                </span>
+
+                <span className="delayed-alert__member">
+                  {t.itName}
+                </span>
+
+                <span className="delayed-alert__due">
+                  Due {t.endDate || '—'}
+                </span>
+
+                <span className="delayed-alert__prog">
+                  {t.progress}%
+                </span>
+
+                {health.expectedProgress > 0 && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: '#94a3b8',
+                    }}
+                  >
+                    Expected {health.expectedProgress}%
+                  </span>
+                )}
+              </div>
+            ))
+          }
         </div>
       )}
     </div>

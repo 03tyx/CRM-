@@ -1,0 +1,100 @@
+.admin-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-2xl);
+  padding: 20px;
+}
+
+.admin-panel__header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.admin-panel__title {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.admin-panel__subtitle {
+  color: var(--text-faint);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.admin-panel__table-wrap {
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-lg);
+  overflow: auto;
+}
+
+.admin-panel__table {
+  border-collapse: collapse;
+  min-width: 760px;
+  width: 100%;
+}
+
+.admin-panel__table th,
+.admin-panel__table td {
+  border-bottom: 1px solid var(--border-base);
+  color: var(--text-body);
+  font-size: 13px;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.admin-panel__table th {
+  background: var(--bg-inset);
+  color: var(--text-heading);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.admin-panel__table tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-panel__member-name {
+  color: var(--text-heading);
+  font-weight: 700;
+}
+
+.admin-panel__member-email {
+  color: var(--text-faint);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.admin-panel__select {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  color: var(--text-heading);
+  font: inherit;
+  padding: 6px 10px;
+}
+
+.admin-panel__select:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.admin-panel__toggle {
+  align-items: center;
+  color: var(--text-body);
+  display: flex;
+  gap: 8px;
+}
+
+.admin-panel__toggle input {
+  accent-color: var(--blue);
+}
+
+.admin-panel__empty {
+  color: var(--text-faint);
+  text-align: center !important;
+}

@@ -462,8 +462,9 @@
 
 // GanttChart.jsx
 import { useMemo, useState, useRef, useEffect } from 'react'
-import { IT_MEMBERS, computeStatus, STATUS_COLOR, today } from './helpers'
+import { computeStatus, STATUS_COLOR, today } from './helpers'
 import './GanttChart.css'
+import { supabase } from './supabase'
 
 const COL_W    = 38
 const ROW_H    = 54
@@ -495,6 +496,36 @@ function buildCols(startDate, endDate) {
 export default function GanttChart({ tasks = [], leaves = [] }) {
   const [hoveredRow, setHoveredRow] = useState(null)
   const scrollRef = useRef(null)
+  const [itMembers, setItMembers] = useState([])
+  const [membersLoading, setMembersLoading] = useState(true)
+
+
+useEffect(() => {
+  async function fetchActiveMembers() {
+    setMembersLoading(true)
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, it_name, email, status')
+      .eq('status', 'active')
+      .order('it_name', { ascending: true })
+
+    if (error) {
+      console.error('Failed to fetch active IT members:', error)
+      setItMembers([])
+    } else {
+      setItMembers(
+        (data || [])
+          .filter(member => member.it_name)
+          .map(member => member.it_name)
+      )
+    }
+
+    setMembersLoading(false)
+  }
+
+  fetchActiveMembers()
+}, [])
 
   // ── Time range ──────────────────────────────────────────────────────────────
   const { rangeStart, rangeEnd, cols } = useMemo(() => {
@@ -554,7 +585,7 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
 
   const byMember = useMemo(() => {
     const map = {}
-    IT_MEMBERS.forEach(m => { map[m] = [] })
+    itMembers.forEach(m => { map[m] = [] })
     tasks.forEach(t => {
       if (!map[t.itName]) return
       const st = computeStatus({ ...t, start_date: t.startDate, end_date: t.endDate })
@@ -567,17 +598,17 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
       map[t.itName].push(t)
     })
     return map
-  }, [tasks, rangeStart, rangeEnd, oneMonthAgo])
+  }, [tasks, itMembers, rangeStart, rangeEnd, oneMonthAgo])
 
   const alByMember = useMemo(() => {
     const map = {}
-    IT_MEMBERS.forEach(m => { map[m] = [] })
+    itMembers.forEach(m => { map[m] = [] })
     leaves.forEach(l => {
       if (!map[l.it_name]) return
       if (l.end_date >= today && l.start_date <= rangeEnd) map[l.it_name].push(l)
     })
     return map
-  }, [leaves, rangeEnd])
+  }, [leaves, itMembers, rangeEnd])
 
   function rowHeight(m) {
     const taskCount = (byMember[m] || []).length
@@ -639,6 +670,11 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
 
   return (
     <div className="gantt-root">
+      {/* {membersLoading ? (
+      <div className="gantt-loading">
+          Loading IT members...
+        </div>
+      ) : ( */}
       <div className="gantt-scroll" ref={scrollRef}>
         <div className="gantt-inner" style={{ minWidth: totalW }}>
 
@@ -729,7 +765,7 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
 
             {/* Sticky left label column */}
             <div className="gantt-labels" style={{ minWidth: LABEL_W, width: LABEL_W }}>
-              {IT_MEMBERS.map(m => {
+              {itMembers.map(m => {
                 const memberTasks = byMember[m] || []
                 const myAL        = alByMember[m] || []
                 const h           = rowHeight(m)
@@ -754,7 +790,7 @@ export default function GanttChart({ tasks = [], leaves = [] }) {
 
             {/* Timeline rows */}
             <div className="gantt-timeline">
-              {IT_MEMBERS.map((m) => {
+              {itMembers.map((m) => {
                 const memberTasks = byMember[m] || []
                 const myAL        = alByMember[m] || []
                 const h           = rowHeight(m)

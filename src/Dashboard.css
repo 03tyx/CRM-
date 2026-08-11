@@ -277,3 +277,8 @@
 .delayed-alert__name  { color: var(--text-heading); flex: 1; }
 .delayed-alert__due   { color: var(--red); }
 .delayed-alert__prog  { color: var(--yellow); min-width: 35px; }
+
+/* ── Project Health ── */
+.project-health-panel {
+  margin-bottom: 16px;
+}

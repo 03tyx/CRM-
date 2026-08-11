@@ -1,47 +1,119 @@
--- ============================================================
--- ResourceIQ — Supabase Schema
--- Run this in: Supabase Dashboard > SQL Editor > New Query
--- ============================================================
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
 
-create table if not exists public.tasks (
-  id           bigserial primary key,
-  it_name      text        not null,
-  project      text        not null,
-  manday       numeric     default 1,
-  al_date      date,
-  start_date   date,
-  end_date     date,
-  progress     integer     default 0 check (progress between 0 and 100),
-  priority     text        default 'High' check (priority in ('High','Low')),
-  status       text        default 'In Progress' check (status in ('In Progress','On Hold','UAT')),
-  updated_date date        default current_date,
-  target_uat   date,
-  target_live  date,
-  created_at   timestamptz default now()
+CREATE TABLE public.tasks (
+  al_date jsonb DEFAULT '[]'::jsonb,
+  it_name text NOT NULL,
+  project text NOT NULL,
+  start_date date,
+  end_date date,
+  target_uat date,
+  target_live date,
+  id bigint NOT NULL DEFAULT nextval('tasks_id_seq'::regclass),
+  manday numeric DEFAULT 1,
+  progress integer DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
+  priority text DEFAULT 'High'::text CHECK (priority = ANY (ARRAY['High'::text, 'Low'::text])),
+  status text DEFAULT 'In Progress'::text CHECK (status = ANY (ARRAY['In Progress'::text, 'Upcoming'::text, 'Delayed'::text, 'On Hold'::text, 'UAT'::text, 'Completed'::text])),
+  updated_date date DEFAULT CURRENT_DATE,
+  created_at timestamp with time zone DEFAULT now(),
+  ready_for_deployment boolean DEFAULT false,
+  CONSTRAINT tasks_pkey PRIMARY KEY (id)
 );
-
--- Enable Row Level Security (recommended even for internal tools)
-alter table public.tasks enable row level security;
-
--- Allow all operations for anonymous/authenticated users
--- (For internal use — tighten this if you add auth later)
-create policy "Allow all" on public.tasks
-  for all using (true) with check (true);
-
--- Enable realtime so all browser tabs update live
-alter publication supabase_realtime add table public.tasks;
-
--- ── Optional: seed with sample data ──────────────────────────
--- (delete this block once you have real data)
--- insert into public.tasks (it_name, project, manday, start_date, end_date, progress, priority, status, updated_date, target_uat, target_live)
--- values
---   ('Ahmad Farid',      'CRM Customer Portal',   10, current_date - 10, current_date + 4,  60, 'High', 'In Progress', current_date, current_date + 10, current_date + 17),
---   ('Siti Nurhaliza',   'Reporting Module',      15, current_date - 14, current_date + 3,  80, 'High', 'In Progress', current_date, current_date + 7,  null),
---   ('Rajesh Kumar',     'API Integration v2',     8, current_date + 3,  current_date + 12, 0,  'Low',  'In Progress', current_date, null,              null),
---   ('Lim Wei Xin',      'Bug Fix Batch #12',      3, current_date - 5,  current_date - 3,  100,'High', 'In Progress', current_date, null,              null),
---   ('Nur Aisyah',       'Feedback Support Q2',    5, current_date - 2,  current_date + 3,  40, 'Low',  'In Progress', current_date, null,              null),
---   ('Kevin Tan',        'Mobile App Sync',        12,current_date + 10, current_date + 21, 0,  'High', 'In Progress', current_date, current_date + 24, current_date + 31),
---   ('Priya Subramaniam','UAT Support CRM v3',     6, current_date - 4,  current_date + 2,  90, 'High', 'UAT',         current_date, current_date + 4,  current_date + 11),
---   ('Muhammad Haziq',   'Data Migration Script',  4, current_date - 20, current_date - 16, 50, 'High', 'In Progress', current_date, null,              null),
---   ('Chloe Wong',       'Dashboard Enhancement',  7, current_date + 3,  current_date + 11, 0,  'Low',  'In Progress', current_date, null,              null),
---   ('Danial Ariff',     'Auth Module Upgrade',    9, current_date - 4,  current_date + 5,  70, 'High', 'In Progress', current_date, current_date + 10, null);
+CREATE TABLE public.subtasks (
+  task_id bigint NOT NULL,
+  title text NOT NULL,
+  owner text,
+  id bigint NOT NULL DEFAULT nextval('subtasks_id_seq'::regclass),
+  done boolean DEFAULT false,
+  status text DEFAULT 'Pending'::text CHECK (status = ANY (ARRAY['Pending'::text, 'In Progress'::text, 'Done'::text, 'Blocked'::text])),
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT subtasks_pkey PRIMARY KEY (id),
+  CONSTRAINT subtasks_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(id)
+);
+CREATE TABLE public.task_logs (
+  task_id bigint,
+  action_type text NOT NULL,
+  old_value text,
+  new_value text,
+  id bigint NOT NULL DEFAULT nextval('task_logs_id_seq'::regclass),
+  changed_by text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT task_logs_pkey PRIMARY KEY (id),
+  CONSTRAINT task_logs_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(id)
+);
+CREATE TABLE public.deployments (
+  title text NOT NULL,
+  deploy_date date NOT NULL,
+  notes text,
+  created_by text,
+  id bigint NOT NULL DEFAULT nextval('deployments_id_seq'::regclass),
+  environment text DEFAULT 'Live'::text CHECK (environment = ANY (ARRAY['Live'::text, 'UAT'::text, 'Staging'::text])),
+  created_at timestamp with time zone DEFAULT now(),
+  rows jsonb NOT NULL DEFAULT '[]'::jsonb,
+  CONSTRAINT deployments_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.deployment_tasks (
+  deployment_id bigint NOT NULL,
+  task_id bigint NOT NULL,
+  CONSTRAINT deployment_tasks_pkey PRIMARY KEY (deployment_id, task_id),
+  CONSTRAINT deployment_tasks_deployment_id_fkey FOREIGN KEY (deployment_id) REFERENCES public.deployments(id),
+  CONSTRAINT deployment_tasks_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(id)
+);
+CREATE TABLE public.daily_scrum (
+  it_name text NOT NULL,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  scrum_date date NOT NULL DEFAULT CURRENT_DATE,
+  prev_day text NOT NULL DEFAULT ''::text,
+  today text NOT NULL DEFAULT ''::text,
+  next_day text NOT NULL DEFAULT ''::text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT daily_scrum_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.it_deployment_entries (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  deployment_id bigint NOT NULL,
+  it_name text NOT NULL,
+  rows jsonb NOT NULL DEFAULT '[]'::jsonb,
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT it_deployment_entries_pkey PRIMARY KEY (id),
+  CONSTRAINT it_deployment_entries_deployment_id_fkey FOREIGN KEY (deployment_id) REFERENCES public.deployments(id)
+);
+CREATE TABLE public.annual_leave (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  it_name text NOT NULL,
+  start_date date NOT NULL,
+  end_date date NOT NULL,
+  note text NOT NULL DEFAULT ''::text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT annual_leave_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.profiles (
+  id uuid NOT NULL,
+  email text NOT NULL,
+  it_name text,
+  role text NOT NULL DEFAULT 'it_user'::text CHECK (role = ANY (ARRAY['super_admin'::text, 'it_user'::text])),
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.it_member_emails (
+  email text NOT NULL,
+  it_name text NOT NULL,
+  CONSTRAINT it_member_emails_pkey PRIMARY KEY (email)
+);
+CREATE TABLE public.super_admin_emails (
+  email text NOT NULL,
+  CONSTRAINT super_admin_emails_pkey PRIMARY KEY (email)
+);
+CREATE TABLE public.audit_logs (
+  id bigint NOT NULL DEFAULT nextval('audit_logs_id_seq'::regclass),
+  created_at timestamp with time zone DEFAULT now(),
+  actor_email text,
+  actor_name text,
+  action text NOT NULL,
+  target text,
+  detail jsonb,
+  CONSTRAINT audit_logs_pkey PRIMARY KEY (id)
+);

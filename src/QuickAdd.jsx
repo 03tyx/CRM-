@@ -1,7 +1,6 @@
-//QuickAdd.jsx
-import { useState } from 'react'
-import { IT_MEMBERS, addWorkdays, today } from './helpers'
-import { useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useAuth } from './useAuth'
+import { addWorkdays, today } from './helpers'
 
 const inpStyle = {
   background: '#0f172a', border: '1px solid #334155', borderRadius: 8,
@@ -14,6 +13,9 @@ const lbl = {
 }
 
 export default function QuickAdd({ onSave, saving, standalone = false }) {
+  const { activeMembers } = useAuth()
+  const members = activeMembers.length > 0 ? activeMembers : []
+
   const [open, setOpen] = useState(standalone)
   const [form, setForm] = useState({
     itName: '', project: '', manday: 1, priority: 'High',
@@ -30,7 +32,6 @@ export default function QuickAdd({ onSave, saving, standalone = false }) {
   function set(k, v) {
     setForm(f => {
       const u = { ...f, [k]: v }
-      // auto-calc end date when manday or startDate changes
       if ((k === 'manday' || k === 'startDate') && u.manday && u.startDate) {
         u.endDate = addWorkdays(u.startDate, Number(u.manday))
       }
@@ -66,33 +67,29 @@ export default function QuickAdd({ onSave, saving, standalone = false }) {
 
   return (
     <>
-      {/* Floating button */}
       {!standalone && (
-      <button
-        onClick={() => setOpen(o => !o)}
-        title="Quick Add Task"
-        style={{
-          position: 'fixed', bottom: 28, right: 28, zIndex: 200,
-          width: 52, height: 52, borderRadius: '50%',
-          background: open ? '#334155' : 'linear-gradient(135deg,#3b82f6,#2563eb)',
-          border: 'none', cursor: 'pointer',
-          boxShadow: '0 4px 20px rgba(59,130,246,0.4)',
-          fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'all 0.2s',
-          color: '#fff',
-        }}>
-        {open ? '✕' : '⚡'}
-      </button>)}
+        <button
+          onClick={() => setOpen(o => !o)}
+          title="Quick Add Task"
+          style={{
+            position: 'fixed', bottom: 28, right: 28, zIndex: 200,
+            width: 52, height: 52, borderRadius: '50%',
+            background: open ? '#334155' : 'linear-gradient(135deg,#3b82f6,#2563eb)',
+            border: 'none', cursor: 'pointer',
+            boxShadow: '0 4px 20px rgba(59,130,246,0.4)',
+            fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.2s', color: '#fff',
+          }}
+        >
+          {open ? '✕' : '⚡'}
+        </button>
+      )}
 
-      {/* Widget panel */}
       {(open || standalone) && (
         <div style={{
           position: 'fixed', bottom: 90, right: 28, zIndex: 200,
-          width: 300,
-          background: '#1e293b',
-          border: '1px solid #334155',
-          borderRadius: 16,
-          padding: 20,
+          width: 300, background: '#1e293b',
+          border: '1px solid #334155', borderRadius: 16, padding: 20,
           boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
           fontFamily: "'DM Sans','Segoe UI',sans-serif",
         }}>
@@ -111,7 +108,9 @@ export default function QuickAdd({ onSave, saving, standalone = false }) {
                 <label style={lbl}>IT Name</label>
                 <select style={inpStyle} value={form.itName} onChange={e => set('itName', e.target.value)}>
                   <option value="">Select member…</option>
-                  {IT_MEMBERS.map(m => <option key={m}>{m}</option>)}
+                  {members.map(m => (
+                    <option key={m.id} value={m.display_name || m.email}>{m.display_name || m.email}</option>
+                  ))}
                 </select>
               </div>
 
@@ -154,12 +153,11 @@ export default function QuickAdd({ onSave, saving, standalone = false }) {
                 onClick={handleSave}
                 disabled={saving}
                 style={{
-                  marginTop: 4,
-                  background: saving ? '#1e3a5f' : 'linear-gradient(135deg,#3b82f6,#2563eb)',
-                  border: 'none', borderRadius: 8, color: '#fff',
-                  padding: '10px 0', fontSize: 13, fontWeight: 700,
-                  cursor: saving ? 'not-allowed' : 'pointer', width: '100%',
-                }}>
+                  marginTop: 4, background: saving ? '#1e3a5f' : 'linear-gradient(135deg,#3b82f6,#2563eb)',
+                  border: 'none', borderRadius: 8, color: '#fff', padding: '10px 0', fontSize: 13,
+                  fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', width: '100%',
+                }}
+              >
                 {saving ? '⏳ Saving…' : '+ Save Task'}
               </button>
             </div>

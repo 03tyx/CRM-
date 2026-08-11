@@ -604,8 +604,8 @@
 
 
 // DeploymentBoard.jsx
-import { useState, useEffect } from 'react'
-import { PA_MEMBERS, today, IFA_MEMBERS, FEEDBACK_LOGS, DISCOVERY_TYPES } from './helpers'
+import { useState, useEffect, Fragment } from 'react'
+import { today, IFA_MEMBERS, FEEDBACK_LOGS, DISCOVERY_TYPES } from './helpers'
 import { lbl, inpStyle } from './ui'
 import { exportDeploymentDocx } from './exportDocx'
 import './DeploymentBoard.css'
@@ -652,13 +652,13 @@ function DeploymentForm({ onSave, onCancel, saving }) {
             placeholder="Internal notes (not included in Word export)"
           />
         </div>
-        <div>
+        {/* <div>
           <label style={lbl}>Created By</label>
           <select style={inpStyle} value={form.createdBy} onChange={e => set('createdBy', e.target.value)}>
             <option value="">Select…</option>
             {PA_MEMBERS.map(m => <option key={m}>{m}</option>)}
           </select>
-        </div>
+        </div> */}
       </div>
       <div className="dep-form__actions">
         <button className="btn-ghost" onClick={onCancel}>Cancel</button>
@@ -769,7 +769,7 @@ function stripHtml(html) {
 // ── Main DeploymentBoard ──────────────────────────────────────────────────────
 export default function DeploymentBoard({
   deployments, loading, saving,
-  createDeployment, deleteDeployment, saveRows, PAMember, itEntries = [],
+  createDeployment, deleteDeployment, saveRows, itEntries = [],
 }) {
   const [showForm,          setShowForm]          = useState(false)
   const [expandedId,        setExpandedId]        = useState(null)
@@ -817,9 +817,18 @@ export default function DeploymentBoard({
       }
     ))
 
+  // async function handleCreate(form) {
+  //   const res = await createDeployment({ ...form, createdBy: PAMember || form.createdBy })
+  //   if (res.success) { setShowForm(false); setExpandedId(res.deployment?.id) }
+  // }
+
   async function handleCreate(form) {
-    const res = await createDeployment({ ...form, createdBy: PAMember || form.createdBy })
-    if (res.success) { setShowForm(false); setExpandedId(res.deployment?.id) }
+    const res = await createDeployment(form)
+
+    if (res.success) {
+      setShowForm(false)
+      setExpandedId(res.deployment?.id)
+    }
   }
 
   async function handleSave(depId) {
@@ -966,7 +975,7 @@ export default function DeploymentBoard({
                     📅 {dep.deploy_date} &nbsp;·&nbsp;
                     <span style={{ color: envColor }}>{dep.environment}</span>
                     &nbsp;·&nbsp; {totalCount} task{totalCount !== 1 ? 's' : ''}
-                    {dep.created_by && <> &nbsp;·&nbsp; by {dep.created_by.split(' ')[0]}</>}
+                    {/* {dep.created_by && <> &nbsp;·&nbsp; by {dep.created_by.split(' ')[0]}</>} */}
                   </div>
                 </div>
                 <div className="dep-card__actions">
@@ -995,8 +1004,42 @@ export default function DeploymentBoard({
               {/* ── Expanded manage panel ── */}
               {expanded && (
                 <div className="dep-card__panel">
+                  {dep.notes && (
+                    <div
+                      style={{
+                        marginBottom: 14,
+                        padding: '10px 12px',
+                        background: 'rgba(59, 130, 246, 0.06)',
+                        border: '1px solid rgba(59, 130, 246, 0.2)',
+                        borderRadius: 8,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: '#60a5fa',
+                          letterSpacing: '0.06em',
+                          textTransform: 'uppercase',
+                          marginBottom: 5,
+                        }}
+                      >
+                        📝 Internal Notes
+                      </div>
 
-                  {/* Show/Hide Test Scenarios toggle */}
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: '#cbd5e1',
+                          lineHeight: 1.6,
+                          whiteSpace: 'pre-wrap',
+                        }}
+                      >
+                        {dep.notes}
+                      </div>
+                    </div>
+                  )}
+                                    {/* Show/Hide Test Scenarios toggle */}
                   <div style={{ marginBottom: 12 }}>
                     <button
                       className="btn-toggle-ts"
@@ -1033,10 +1076,10 @@ export default function DeploymentBoard({
                               const hasTS        = showTS  // show TS row when toggle is on
 
                               return (
-                                <>
+                                <Fragment key={`${row.id}-${d.id}`}>
                                   {/* ── Main data row ── */}
                                   <tr
-                                    key={d.id}
+                                    
                                     className={isLastDetail && !hasTS ? 'dep-tr--last-detail' : 'dep-tr--mid-detail'}
                                   >
                                     {di === 0 && (
@@ -1128,7 +1171,7 @@ export default function DeploymentBoard({
 
                                   {/* ── Test Scenarios read-only row (shown when toggle is on) ── */}
                                   {hasTS && (
-                                    <tr key={`${d.id}-ts`} className={isLastDetail ? 'dep-tr--last-detail' : 'dep-tr--mid-detail'}>
+                                    <tr className={isLastDetail ? 'dep-tr--last-detail' : 'dep-tr--mid-detail'}>
                                       {/* spans: Remarks + Disc + Test + MD + PIC + Live + action = 7 cols */}
                                       <td colSpan={7} style={{ padding: '6px 10px 10px', background: 'rgba(139,92,246,0.04)', borderTop: '1px dashed #1e293b' }}>
                                         <div style={{ fontSize: 10, fontWeight: 700, color: '#8b5cf6', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 }}>
@@ -1145,7 +1188,7 @@ export default function DeploymentBoard({
                                       </td>
                                     </tr>
                                   )}
-                                </>
+                                </Fragment>
                               )
                             })
                           })}
@@ -1209,8 +1252,8 @@ export default function DeploymentBoard({
                                         const tsSpan  = showTS ? 2 : 1
                                         const isLast  = di === (row.details?.length ?? 1) - 1
                                         return (
-                                          <>
-                                            <tr key={d.id} style={{ borderBottom: isLast && !showTS ? '1px solid #1e293b' : 'none' }}>
+                                          <Fragment key={`${row.id}-${d.id}`}>
+                                            <tr style={{ borderBottom: isLast && !showTS ? '1px solid #1e293b' : 'none' }}>
                                               {di === 0 && (
                                                 <td rowSpan={(row.details?.length ?? 1) * tsSpan} style={{ width: 40, padding: 8, color: '#a4acb7', verticalAlign: 'middle', fontWeight: 700, textAlign: 'center' }}>
                                                   {rowIdx + 1}
@@ -1235,7 +1278,7 @@ export default function DeploymentBoard({
                                               <td className="dep-td dep-td--readonly-live">{d.liveDate || '—'}</td>
                                             </tr>
                                             {showTS && (
-                                              <tr key={`${d.id}-ts`} style={{ borderBottom: isLast ? '1px solid #1e293b' : 'none' }}>
+                                              <tr style={{ borderBottom: isLast ? '1px solid #1e293b' : 'none' }}>
                                                 <td colSpan={6} style={{ padding: '4px 8px 8px', background: 'rgba(139,92,246,0.04)', borderTop: '1px dashed #1e293b' }}>
                                                   <div style={{ fontSize: 10, fontWeight: 700, color: '#8b5cf6', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 3 }}>
                                                     Test Scenarios
@@ -1248,7 +1291,7 @@ export default function DeploymentBoard({
                                                 </td>
                                               </tr>
                                             )}
-                                          </>
+                                          </Fragment>
                                         )
                                       })
                                     )}

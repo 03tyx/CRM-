@@ -47,18 +47,139 @@ export function useTasks() {
   }, [])
 
   // ── Realtime ────────────────────────────────────────────
-  useEffect(() => {
-    fetchTasks()
-    fetchSubtasks()
+  // useEffect(() => {
+  //   fetchTasks()
+  //   fetchSubtasks()
 
-    const channel = supabase
-      .channel('realtime-all')
-      .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, fetchTasks)
-      .on('postgres_changes', { event: '*', schema: 'public', table: SUBTASKS_TABLE }, fetchSubtasks)
-      .subscribe()
+  //   const channel = supabase
+  //     .channel('realtime-all')
+  //     .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, fetchTasks)
+  //     .on('postgres_changes', { event: '*', schema: 'public', table: SUBTASKS_TABLE }, fetchSubtasks)
+  //     .subscribe()
 
-    return () => supabase.removeChannel(channel)
-  }, [fetchTasks, fetchSubtasks])
+  //   return () => supabase.removeChannel(channel)
+  // }, [fetchTasks, fetchSubtasks])
+
+  // ── Realtime ────────────────────────────────────────────
+useEffect(() => {
+  // Initial load only
+  fetchTasks()
+  fetchSubtasks()
+
+  const channel = supabase
+    .channel('realtime-all')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: TABLE,
+      },
+      payload => {
+        const { eventType, new: newRow, old: oldRow } = payload
+
+        setTasks(currentTasks => {
+          switch (eventType) {
+            case 'INSERT': {
+              const task = fromDb(newRow)
+
+              // Prevent duplicate when createTask()
+              // has already added the task locally.
+              const exists = currentTasks.some(
+                taskItem => taskItem.id === task.id
+              )
+
+              if (exists) {
+                return currentTasks
+              }
+
+              return [...currentTasks, task].sort(
+                (a, b) =>
+                  (a.startDate || '').localeCompare(
+                    b.startDate || ''
+                  )
+              )
+            }
+
+            case 'UPDATE': {
+              const task = fromDb(newRow)
+
+              return currentTasks
+                .map(taskItem =>
+                  taskItem.id === task.id
+                    ? task
+                    : taskItem
+                )
+                .sort(
+                  (a, b) =>
+                    (a.startDate || '').localeCompare(
+                      b.startDate || ''
+                    )
+                )
+            }
+
+            case 'DELETE': {
+              return currentTasks.filter(
+                taskItem => taskItem.id !== oldRow.id
+              )
+            }
+
+            default:
+              return currentTasks
+          }
+        })
+      }
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: SUBTASKS_TABLE,
+      },
+      payload => {
+        const { eventType, new: newRow, old: oldRow } = payload
+
+        setSubtasks(currentSubtasks => {
+          switch (eventType) {
+            case 'INSERT': {
+              const exists = currentSubtasks.some(
+                subtask => subtask.id === newRow.id
+              )
+
+              if (exists) {
+                return currentSubtasks
+              }
+
+              return [...currentSubtasks, newRow]
+            }
+
+            case 'UPDATE': {
+              return currentSubtasks.map(subtask =>
+                subtask.id === newRow.id
+                  ? newRow
+                  : subtask
+              )
+            }
+
+            case 'DELETE': {
+              return currentSubtasks.filter(
+                subtask => subtask.id !== oldRow.id
+              )
+            }
+
+            default:
+              return currentSubtasks
+          }
+        })
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
+}, [fetchTasks, fetchSubtasks])
 
   // ── Logging ─────────────────────────────────────────────
   const logAction = useCallback(async ({

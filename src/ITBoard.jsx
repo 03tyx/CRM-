@@ -588,13 +588,14 @@
 // }
 
 // ITBoard.jsx
-import { useState, useMemo, useEffect, useRef } from 'react'
-import { IT_MEMBERS, IFA_MEMBERS, FEEDBACK_LOGS, DISCOVERY_TYPES, today, computeStatus, STATUS_COLOR, STATUS_BG } from './helpers'
+import { useState, useMemo, useEffect, useRef, Fragment } from 'react'
+import { IFA_MEMBERS, FEEDBACK_LOGS, DISCOVERY_TYPES, today, computeStatus, STATUS_COLOR, STATUS_BG } from './helpers'
 import { lbl, inpStyle, btnPrimary, btnGhost } from './ui'
 import { useAnnualLeave } from './useAnnualLeave'
 import { useITEntries } from './useITEntries'
 import TaskForm from './TaskForm'
 import './ITBoard.css'
+import { supabase } from './supabase'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -1028,7 +1029,7 @@ function ITDeploymentSection({ itName, deployments = [], entries, getRows, saveR
   }
 
   // Number of data columns (excluding action col): # Task Remark Disc Test MD PIC Live = 8
-  const DATA_COLS = 8
+  // const DATA_COLS = 8
 
   return (
     <div className="it-dep-list">
@@ -1074,9 +1075,9 @@ function ITDeploymentSection({ itName, deployments = [], entries, getRows, saveR
                           const isSelfDisc   = d.discovery === 'self-discovered'
                           const isLastDetail = di === span - 1
                           return (
-                            <>
+                            <Fragment key={d.id}>
                               {/* ── Main data row ── */}
-                              <tr key={d.id} className={isLastDetail && !d.testScenario ? 'dep-tr--last-detail' : 'dep-tr--mid-detail'}>
+                              <tr className={isLastDetail && !d.testScenario ? 'dep-tr--last-detail' : 'dep-tr--mid-detail'}>
                                 {di === 0 && (
                                   <td rowSpan={span * 2} className="dep-td--span dep-td--num">{rowIdx + 1}</td>
                                 )}
@@ -1130,7 +1131,7 @@ function ITDeploymentSection({ itName, deployments = [], entries, getRows, saveR
                               </tr>
 
                               {/* ── Test Scenario row (spans all cols except # and Task) ── */}
-                              <tr key={`${d.id}-ts`} className={isLastDetail ? 'dep-tr--last-detail' : 'dep-tr--mid-detail'}>
+                              <tr className={isLastDetail ? 'dep-tr--last-detail' : 'dep-tr--mid-detail'}>
                                 <td colSpan={7} style={{ padding: '4px 8px 10px', background: 'rgba(139,92,246,0.04)', borderTop: '1px dashed #1e293b' }}>
                                   <div style={{ fontSize: 10, fontWeight: 700, color: '#8b5cf6', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 }}>
                                     Test Scenarios from iFAST
@@ -1142,7 +1143,7 @@ function ITDeploymentSection({ itName, deployments = [], entries, getRows, saveR
                                   />
                                 </td>
                               </tr>
-                            </>
+                            </Fragment>
                           )
                         })
                       })}
@@ -1241,18 +1242,113 @@ function ITMemberCard({ itName, tasks = [], deployments = [], itEntries = [], ge
 // Main ITBoard
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function ITBoard({ tasks = [], deployments = [], itEntries = [], getRows, saveRows, syncToMainDeployment, createTask, updateTask, deleteTask, saving }) {
-  const [search, setSearch] = useState('')
+// export default function ITBoard({ tasks = [], deployments = [], itEntries = [], getRows, saveRows, syncToMainDeployment, createTask, updateTask, deleteTask, saving }) {
+//   const [search, setSearch] = useState('')
 
-  const filtered = IT_MEMBERS.filter(name => name.toLowerCase().includes(search.toLowerCase()))
+//   const filtered = IT_MEMBERS.filter(name => name.toLowerCase().includes(search.toLowerCase()))
+
+//   return (
+//     <div>
+//       <div className="itboard__header">
+//         <div>
+//           <h2 className="itboard__title">👤 IT Board</h2>
+//           <p className="itboard__subtitle">Per-member tasks and deployment items.</p>
+//         </div>
+//         <input
+//           className="itboard__search"
+//           value={search}
+//           onChange={e => setSearch(e.target.value)}
+//           placeholder="Search member…"
+//         />
+//       </div>
+
+//       <div className="itboard__list">
+//         {filtered.map(name => (
+//           <ITMemberCard
+//             key={name} itName={name}
+//             tasks={tasks} deployments={deployments} itEntries={itEntries}
+//             getRows={getRows} saveRows={saveRows} syncToMainDeployment={syncToMainDeployment}
+//             createTask={createTask} updateTask={updateTask} deleteTask={deleteTask}
+//             saving={saving}
+//           />
+//         ))}
+//         {filtered.length === 0 && (
+//           <div className="itboard__empty">No members match "{search}"</div>
+//         )}
+//       </div>
+//     </div>
+//   )
+// }
+
+export default function ITBoard({
+  tasks = [],
+  deployments = [],
+  itEntries = [],
+  getRows,
+  saveRows,
+  syncToMainDeployment,
+  createTask,
+  updateTask,
+  deleteTask,
+  saving
+}) {
+  const [search, setSearch] = useState('')
+  const [itMembers, setItMembers] = useState([])
+  const [membersLoading, setMembersLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function fetchITMembers() {
+      setMembersLoading(true)
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('it_name')
+        .eq('role', 'it_user')
+        .eq('status', 'active')
+        .not('it_name', 'is', null)
+        .order('it_name')
+
+      if (cancelled) return
+
+      if (error) {
+        console.error('Failed to fetch IT members:', error)
+        setItMembers([])
+      } else {
+        setItMembers(
+          [...new Set(
+            (data || [])
+              .map(row => row.it_name?.trim())
+              .filter(Boolean)
+          )]
+        )
+      }
+
+      setMembersLoading(false)
+    }
+
+    fetchITMembers()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const filtered = itMembers.filter(name =>
+    name.toLowerCase().includes(search.toLowerCase())
+  )
 
   return (
     <div>
       <div className="itboard__header">
         <div>
           <h2 className="itboard__title">👤 IT Board</h2>
-          <p className="itboard__subtitle">Per-member tasks and deployment items.</p>
+          <p className="itboard__subtitle">
+            Per-member tasks and deployment items.
+          </p>
         </div>
+
         <input
           className="itboard__search"
           value={search}
@@ -1261,20 +1357,36 @@ export default function ITBoard({ tasks = [], deployments = [], itEntries = [], 
         />
       </div>
 
-      <div className="itboard__list">
-        {filtered.map(name => (
-          <ITMemberCard
-            key={name} itName={name}
-            tasks={tasks} deployments={deployments} itEntries={itEntries}
-            getRows={getRows} saveRows={saveRows} syncToMainDeployment={syncToMainDeployment}
-            createTask={createTask} updateTask={updateTask} deleteTask={deleteTask}
-            saving={saving}
-          />
-        ))}
-        {filtered.length === 0 && (
-          <div className="itboard__empty">No members match "{search}"</div>
-        )}
-      </div>
+      {membersLoading ? (
+        <div className="itboard__empty">
+          Loading IT members...
+        </div>
+      ) : (
+        <div className="itboard__list">
+          {filtered.map(name => (
+            <ITMemberCard
+              key={name}
+              itName={name}
+              tasks={tasks}
+              deployments={deployments}
+              itEntries={itEntries}
+              getRows={getRows}
+              saveRows={saveRows}
+              syncToMainDeployment={syncToMainDeployment}
+              createTask={createTask}
+              updateTask={updateTask}
+              deleteTask={deleteTask}
+              saving={saving}
+            />
+          ))}
+
+          {filtered.length === 0 && (
+            <div className="itboard__empty">
+              No members match "{search}"
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
